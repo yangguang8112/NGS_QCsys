@@ -28,6 +28,8 @@
 
 {% block contained %}
 
+
+
 </br>
 </br>
 </br>
@@ -35,13 +37,25 @@
 </br>
 </br>
 
-<div class="target" contenteditable="true"></div>
+<div class="target" contenteditable="false">
+    从Excel中复制粘贴或者讲Excel文件拖拽进来
+</div>
 
 
 
 <div class="row stream_table_row" id="paste_data">
 </div>
 
+
+<div id="upload_data">
+
+</div>
+
+<div class="progress">
+    <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
+      <span class="sr-only">45% Complete</span>
+    </div>
+</div>
 
 
 

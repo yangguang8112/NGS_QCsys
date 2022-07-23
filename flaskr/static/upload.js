@@ -1,3 +1,6 @@
+'use strict';
+
+
 function sample_streamtable(samples) {
     $(function() {
         // This is mostly copied from <https://michigangenomics.org/health_data.html>.
@@ -93,10 +96,117 @@ $(function() {
         // console.log(data);
         show_table(col_arr);
         sample_streamtable(data);
+        window.colName = col_arr;
+        window.contentData = data;
+        upload();
       }
     });
+
+
+    $(document).on({
+        dragleave:function(e){      //拖离
+            e.preventDefault();
+        },
+        drop:function(e){           //拖后放
+            e.preventDefault();
+        },
+        dragenter:function(e){      //拖进
+            e.preventDefault();
+        },
+        dragover:function(e){       //拖来拖去
+            e.preventDefault();
+        }
+        });
+
+
+    target.addEventListener('drop', (e) => {
+        e.preventDefault(); //取消默认浏览器拖拽效果
+        var fileList = e.dataTransfer.files; //获取文件对象
+        //检测是否是拖拽文件到页面的操作
+        if (fileList.length == 0) {
+            return false;
+        }
+        console.log(fileList[0]);
+        var target_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port + '/upload';
+        var form = new FormData(), 
+            url = target_url, 
+            file=fileList[0];
+        form.append('file', file)
+
+        var xhr = new XMLHttpRequest();
+        console.log(url);
+        xhr.open("post", url, true)
+        //上传进度事件
+        xhr.upload.addEventListener("progress", function(result) {
+            if (result.lengthComputable) {
+                //上传进度
+                var percent = (result.loaded / result.total * 100).toFixed(2);
+                console.log(percent);
+                $("#sss").progress('set progress', percent);
+            }
+        }, false);
+        
+        
+        xhr.addEventListener("readystatechange", function(flag = 0) {
+            var result = xhr;
+            flag += 1;
+            if (result.lengthComputable) {
+                //上传进度
+                var percent = (result.loaded / result.total * 100).toFixed(2);
+                console.log(percent);
+            }
+            // console.log(flag);
+            // var res_json = JSON.parse(result.response)
+            
+            // if (result.status != 200) { //error
+            //     console.log('上传失败', result.status, result.statusText, result.response);
+            // }
+            // else if (result.readyState == 4) { //finished
+            //     console.log('上传成功', result);
+            // }
+            if (flag == 3) {
+                res_json = eval("(" + result.response + ")");
+                // res_json = JSON.parse(result.response)
+                console.log(res_json);
+                show_table(res_json['col_name']);
+                sample_streamtable(res_json['data']);
+                window.colName = res_json['col_name'];
+                window.contentData = res_json['data'];
+                upload();
+            }
+        });
+        xhr.send(form); //开始上传
+      }
+    );
 });
 
 function return_col_num() {
     return window.col_num;
+}
+
+
+function upload() {
+    const box = document.getElementById("upload_data");
+
+    box.innerHTML = "<button type=\"button\" onclick=\"upload_data()\">上传</button>";
+}
+
+function upload_data() {
+    console.log("==========================sss==========================");
+    console.log(window.colName);
+    var target_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port + '/insert_excel_data';
+    var form = new FormData();
+    form.append('col_arr', JSON.stringify(window.colName));
+    form.append('data', JSON.stringify(window.contentData));
+    var xhr = new XMLHttpRequest();
+    xhr.open("post", target_url, true)
+    xhr.send(form);
+    xhr.addEventListener("readystatechange", function() {
+        var result = xhr;
+        flag += 1;
+        if (flag == 3) {
+            console.log("上传完成");
+            console.log(result);
+        }
+    });
 }
