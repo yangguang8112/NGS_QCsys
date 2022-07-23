@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>NSpinner</title>
+    <!-- <link rel="stylesheet" href="resources/styles/NSpinner.css">
+    <script type="text/javascript" src="resources/scripts/NSpinner.js"></script> -->
+    <link href="{{ url_for('.static', filename='NSpinner.css') }}" rel="stylesheet" type="text/css">
+    <script src="{{ url_for('.static', filename='NSpinner.js') }}" type="text/javascript"></script>
+    <script type="text/javascript">
+        function showSpinner() {
+            if (NSpinner) {
+                NSpinner.show();
+            }
+        }
+        function hideSpinner() {
+            if (NSpinner) {
+                NSpinner.hide();
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <button onclick="showSpinner();">显示</button>
+    <button onclick="hideSpinner();">隐藏</button>
+</body>
+
+</html>

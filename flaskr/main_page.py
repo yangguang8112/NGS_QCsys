@@ -71,6 +71,7 @@ def remove_models():
 
 @bp.route('/ceshi')
 def ceshi():
+    # return render_template("ceshi.html")
     url = 'http://localhost:5000/insert_model_info'
     form = {
         "model_name": "ceshi_model",
@@ -82,8 +83,7 @@ def ceshi():
         "use_data_ids":"json的字符串形式"
     }
     r = requests.post(url=url, data=form)
-    return r.text
-
+    return "OK"
 
 @bp.route('/show_data_demo')
 def show_data_demo():

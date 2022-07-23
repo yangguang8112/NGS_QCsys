@@ -6,6 +6,8 @@
 <script src="{{ url_for('.static', filename='vendor/stream_table-1.1.1.min.js') }}" type="text/javascript"></script>
 <script src="{{ url_for('.static', filename='upload.js') }}" type="text/javascript"></script>
 
+<link href="{{ url_for('.static', filename='NSpinner.css') }}" rel="stylesheet" type="text/css">
+<script src="{{ url_for('.static', filename='NSpinner.js') }}" type="text/javascript"></script>
 
 <style>
     div.source, div.target {
@@ -38,7 +40,7 @@
 </br>
 
 <div class="target" contenteditable="false">
-    从Excel中复制粘贴或者讲Excel文件拖拽进来
+    从Excel中复制粘贴或者把Excel文件拖拽进来
 </div>
 
 
@@ -51,12 +53,22 @@
 
 </div>
 
+
+
+
+
+{% endblock %}
+
+
+
+</br>
+</br>
+</br>
+</br>
+</br>
+</br>
 <div class="progress">
     <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 45%">
       <span class="sr-only">45% Complete</span>
     </div>
 </div>
-
-
-
-{% endblock %}

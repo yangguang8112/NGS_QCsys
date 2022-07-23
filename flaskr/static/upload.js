@@ -6,8 +6,8 @@ function sample_streamtable(samples) {
         // This is mostly copied from <https://michigangenomics.org/health_data.html>.
         // var data = _.sortBy(_.where(samples, {peak: true}), _.property('pval'));
         var data = samples;
-        data_html = '<tr>';
-        for (i=0; i < samples[0].length; i++) {
+        var data_html = '<tr>';
+        for (var i=0; i < samples[0].length; i++) {
             data_html = `${data_html}<td><%= v[${i}] %></td>`
         }
         data_html = `${data_html}</tr>`
@@ -51,12 +51,12 @@ function sample_streamtable(samples) {
 
 function show_table(col_arr) {
     const box = document.getElementById("paste_data");
-    col_html = '';
-    for (i=0; i<col_arr.length; i++) {
+    var col_html = '';
+    for (var i=0; i<col_arr.length; i++) {
         col_html = `${col_html}<th>${col_arr[i]}</th>`
     }
     // console.log(col_html);
-    HTML = `
+    var HTML = `
     <div class="col-xs-12">
         <table id="stream_table" class="table table-striped table-bordered">
         <thead>
@@ -91,8 +91,8 @@ $(function() {
         }
         // console.log(arr);
         event.preventDefault();
-        col_arr = arr[0];
-        data = arr.slice(1, arr.length);
+        let col_arr = arr[0];
+        let data = arr.slice(1, arr.length);
         // console.log(data);
         show_table(col_arr);
         sample_streamtable(data);
@@ -136,18 +136,19 @@ $(function() {
         var xhr = new XMLHttpRequest();
         console.log(url);
         xhr.open("post", url, true)
+        NSpinner.show();
         //上传进度事件
         xhr.upload.addEventListener("progress", function(result) {
             if (result.lengthComputable) {
                 //上传进度
                 var percent = (result.loaded / result.total * 100).toFixed(2);
                 console.log(percent);
-                $("#sss").progress('set progress', percent);
+                // $("#sss").progress('set progress', percent);
             }
         }, false);
         
-        
-        xhr.addEventListener("readystatechange", function(flag = 0) {
+        var flag = 0
+        xhr.addEventListener("readystatechange", function() {
             var result = xhr;
             flag += 1;
             if (result.lengthComputable) {
@@ -155,7 +156,7 @@ $(function() {
                 var percent = (result.loaded / result.total * 100).toFixed(2);
                 console.log(percent);
             }
-            // console.log(flag);
+            console.log(flag);
             // var res_json = JSON.parse(result.response)
             
             // if (result.status != 200) { //error
@@ -165,7 +166,8 @@ $(function() {
             //     console.log('上传成功', result);
             // }
             if (flag == 3) {
-                res_json = eval("(" + result.response + ")");
+                NSpinner.hide();
+                var res_json = eval("(" + result.response + ")");
                 // res_json = JSON.parse(result.response)
                 console.log(res_json);
                 show_table(res_json['col_name']);
@@ -192,6 +194,7 @@ function upload() {
 }
 
 function upload_data() {
+    NSpinner.show();
     console.log("==========================sss==========================");
     console.log(window.colName);
     var target_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port + '/insert_excel_data';
@@ -201,12 +204,14 @@ function upload_data() {
     var xhr = new XMLHttpRequest();
     xhr.open("post", target_url, true)
     xhr.send(form);
+    var flag = 0
     xhr.addEventListener("readystatechange", function() {
         var result = xhr;
         flag += 1;
         if (flag == 3) {
             console.log("上传完成");
             console.log(result);
+            NSpinner.hide();
         }
     });
 }
