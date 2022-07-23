@@ -50,6 +50,7 @@
                 <li><a href="{{ url_for('.show_data_demo') }}" style="color: #333; font-weight: bold;">Show some data</a></li>
                 <li><a href="{{ url_for('.predict') }}" style="color: #333; font-weight: bold;">Predict</a></li>
                 <li><a href="{{ url_for('.upload_page') }}" style="color: #333; font-weight: bold;">Upload</a></li>
+                <li><a href="{{ url_for('.models_page') }}" style="color: #333; font-weight: bold;">Models</a></li>
                 <li><a href="{{ url_for('.about_page') }}" style="color: #333; font-weight: bold;">About</a></li>
                 {% if current_user and current_user.is_authenticated %}
                 <li><a href="{{ url_for('.logout') }}" style="color: #333; font-weight: bold;">Logout ({{ current_user.email }})</a></li>

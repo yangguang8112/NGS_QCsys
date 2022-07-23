@@ -1,6 +1,19 @@
 DROP TABLE IF EXISTS sample_all_info;
 DROP TABLE IF EXISTS warning_note_words;
 
+
+CREATE TABLE models_info (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    model_name TEXT NOT NULL,
+    features TEXT NOT NULL,
+    base_model_name TEXT NOT NULL,
+    valid_set_perform TEXT NOT NULL,
+    perform_in_1w TEXT NOT NULL,
+    training_status TEXT NOT NULL,
+    use_data_ids TEXT NOT NULL,
+    created TIMESTAMP DEFAULT (datetime('now','localtime'))
+);
+
 CREATE TABLE sample_all_info (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	task_code TEXT NOT NULL,

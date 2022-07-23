@@ -1,3 +1,5 @@
+from calendar import month
+from statistics import mode
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, Flask
 )
@@ -12,7 +14,7 @@ from werkzeug.utils import secure_filename
 import os
 import random
 from model import pred_one
-# import request
+import requests
 import flask
 import json
 
@@ -30,8 +32,61 @@ def homepage():
     # return render_template('layout.html')
     return render_template('mainpage.html')
 
+@bp.route('/models_page')
+def models_page():
+    db = get_db()
+    table_data = db.execute('select * from models_info').fetchall()
+    table_info = db.execute('PRAGMA table_info(models_info)').fetchall()
+    col_names = [x[1] for x in table_info][:-1]
+    db.close()
+    data = []
+    for d in table_data:
+        data.append([d[col] for col in col_names])
+    return render_template('models_page.html', col_names=col_names, data=data)
+
+@bp.route('/insert_model_info', methods=['POST'])
+def insert_model_info():
+    form = request.form
+    print("========================================")
+    db = get_db()
+    table_info = db.execute('PRAGMA table_info(models_info)').fetchall()
+    col_names = [x[1] for x in table_info][1:-1]
+    sql_code = '''INSERT INTO models_info ({col_names}) VALUES ("{values}")'''.format(col_names=",".join(col_names), values='","'.join([form[x] for x in col_names]))
+    print(sql_code)
+    db.execute(sql_code)
+    db.commit()
+    db.close()
+    return "OK--modelinfo"
+
+@bp.route('/remove_models', methods=['POST'])
+def remove_models():
+    ids = request.form['select_ids'].split(',')
+    db = get_db()
+    for id in ids:
+        db.execute('DELETE FROM models_info WHERE id = {id}'.format(id=id))
+    db.commit()
+    db.close()
+    print("=============\nremove ids:{}\n==============".format(",".join(ids)))
+    return "OK"
+
+@bp.route('/ceshi')
+def ceshi():
+    url = 'http://localhost:5000/insert_model_info'
+    form = {
+        "model_name": "ceshi_model",
+        "features": "json的字符串形式",
+        "base_model_name": "RF_model",
+        "valid_set_perform": "-",
+        "perform_in_1w": "-",
+        "training_status": "Training",
+        "use_data_ids":"json的字符串形式"
+    }
+    r = requests.post(url=url, data=form)
+    return r.text
+
+
 @bp.route('/show_data_demo')
-def  show_data_demo():
+def show_data_demo():
     db = get_db()
     sql_code = '''
     SELECT * FROM sample_all_info LIMIT 5000;
