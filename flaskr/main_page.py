@@ -1,5 +1,8 @@
-from calendar import month
+from calendar import c, month
+from lib2to3.pgen2.pgen import generate_grammar
+from ossaudiodev import control_names
 from statistics import mode
+from this import d
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, Flask
 )
@@ -13,7 +16,7 @@ import sys
 from werkzeug.utils import secure_filename
 import os
 import random
-from model import pred_one
+from model import generate_training_info, pred_one, training_model
 import requests
 import flask
 import json
@@ -32,6 +35,32 @@ def homepage():
     # return render_template('layout.html')
     return render_template('mainpage.html')
 
+@bp.route('/training')
+def training():
+    db = get_db()
+    bad_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'NO'").fetchall()
+    bad_num = len(bad_samples)
+    print(bad_num)
+    good_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'YES' LIMIT %d" % (5000-bad_num)).fetchall()
+    col_names = good_samples[0].keys()
+    data = {}
+    for col in col_names:
+        data[col] = []
+        for Raw in bad_samples+good_samples:
+            data[col].append(Raw[col])
+    df = pd.DataFrame(data)
+    print(df)
+    training_info = generate_training_info(df)
+    # print(training_info)
+    # url = 'http://%s/insert_model_info' % request.host
+    # print(url)
+    _ = insert_model_info(training_info)
+    result = training_model(df,training_info['model_name'])
+    _ = update_model_info(result)
+    # print(result)
+    db.close()
+    return "finishingggggggg"
+
 @bp.route('/models_page')
 def models_page():
     db = get_db()
@@ -44,19 +73,31 @@ def models_page():
         data.append([d[col] for col in col_names])
     return render_template('models_page.html', col_names=col_names, data=data)
 
-@bp.route('/insert_model_info', methods=['POST'])
-def insert_model_info():
-    form = request.form
+# @bp.route('/insert_model_info', methods=['POST'])
+def insert_model_info(post_form):
+    form = post_form
     print("========================================")
-    db = get_db()
-    table_info = db.execute('PRAGMA table_info(models_info)').fetchall()
+    db_insert_model = get_db()
+    table_info = db_insert_model.execute('PRAGMA table_info(models_info)').fetchall()
     col_names = [x[1] for x in table_info][1:-1]
-    sql_code = '''INSERT INTO models_info ({col_names}) VALUES ("{values}")'''.format(col_names=",".join(col_names), values='","'.join([form[x] for x in col_names]))
+    sql_code = '''INSERT INTO models_info ({col_names}) VALUES ({values})'''.format(col_names=",".join(col_names), values=",".join(['?'] * len(col_names)))
     print(sql_code)
-    db.execute(sql_code)
-    db.commit()
-    db.close()
+    db_insert_model.execute(sql_code, [form[x] for x in col_names])
+    db_insert_model.commit()
+    # db_insert_model.close()
+    # 这里和下面的update不close是因为他们都在training函数中运行，如果前面有close后面的db就没法操作了，修改变量名也没有办法，后面需要找方法解决
     return "OK--modelinfo"
+
+def update_model_info(update_info):
+    db_update = get_db()
+    sql = "UPDATE models_info SET valid_set_perform = '{valid_v}', perform_in_1w = '{w_v}', training_status = '{train_v}' WHERE model_name = '{model_v}'".format(
+                valid_v=update_info['valid_set_perform'], w_v=update_info['perform_in_1w'], train_v=update_info['training_status'], model_v=update_info['model_name'])
+    print(sql)
+    db_update.execute(sql)
+    db_update.commit()
+    # db_update.close()
+    return "Done"
+
 
 @bp.route('/remove_models', methods=['POST'])
 def remove_models():
@@ -72,17 +113,18 @@ def remove_models():
 @bp.route('/ceshi')
 def ceshi():
     # return render_template("ceshi.html")
-    url = 'http://localhost:5000/insert_model_info'
+    # url = 'http://localhost:5000/insert_model_info'
     form = {
-        "model_name": "ceshi_model",
+        "model_name": "RFC_4432_1658673253",
         "features": "json的字符串形式",
         "base_model_name": "RF_model",
-        "valid_set_perform": "-",
-        "perform_in_1w": "-",
-        "training_status": "Training",
+        "valid_set_perform": "00000000000000",
+        "perform_in_1w": "h",
+        "training_status": "Done",
         "use_data_ids":"json的字符串形式"
     }
-    r = requests.post(url=url, data=form)
+    # r = requests.post(url=url, data=form)
+    update_model_info(form)
     return "OK"
 
 @bp.route('/show_data_demo')
@@ -137,9 +179,12 @@ def insert_from_execl(col_arr, data):
     for i, col in enumerate(col_arr):
         df_data[col] = [x[i] for x in data]
     df = pd.DataFrame(df_data)
+    train_flag = 0
+    if len(df[df['Judge'] == 'NO']) > 0:
+        train_flag = 1
     print(df)
     insert_data_func('_', file_type='_', df_input=df)
-    return "OK"
+    return train_flag
     
 
 def insert_data_func(file_path, file_type='xlsx', df_input=None):
@@ -257,9 +302,8 @@ def upload():
 def insert_excel_data():
     col_name = json.loads(request.form['col_arr'])
     data = json.loads(request.form['data'])
-    print("hahhhhhhh!!!!!!!!!!!!!")
-    insert_from_execl(col_name, data)
-    return "pass"
+    train_flag = insert_from_execl(col_name, data)
+    return {"insert_status": 1, "train_flag": train_flag}
 
 @bp.route('/find_samples')
 def find_samples():

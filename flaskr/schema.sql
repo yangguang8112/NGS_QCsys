@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS sample_all_info;
 DROP TABLE IF EXISTS warning_note_words;
+DROP TABLE IF EXISTS models_info;
 
 
 CREATE TABLE models_info (

@@ -142,7 +142,7 @@ $(function() {
             if (result.lengthComputable) {
                 //上传进度
                 var percent = (result.loaded / result.total * 100).toFixed(2);
-                console.log(percent);
+                // console.log(percent);
                 // $("#sss").progress('set progress', percent);
             }
         }, false);
@@ -154,9 +154,9 @@ $(function() {
             if (result.lengthComputable) {
                 //上传进度
                 var percent = (result.loaded / result.total * 100).toFixed(2);
-                console.log(percent);
+                // console.log(percent);
             }
-            console.log(flag);
+            // console.log(flag);
             // var res_json = JSON.parse(result.response)
             
             // if (result.status != 200) { //error
@@ -169,7 +169,7 @@ $(function() {
                 NSpinner.hide();
                 var res_json = eval("(" + result.response + ")");
                 // res_json = JSON.parse(result.response)
-                console.log(res_json);
+                // console.log(res_json);
                 show_table(res_json['col_name']);
                 sample_streamtable(res_json['data']);
                 window.colName = res_json['col_name'];
@@ -190,14 +190,15 @@ function return_col_num() {
 function upload() {
     const box = document.getElementById("upload_data");
 
-    box.innerHTML = "<button type=\"button\" onclick=\"upload_data()\">上传</button>";
+    box.innerHTML = "<button class=\"button-1\" role=\"button\" onclick=\"upload_data()\">上传</button>"
 }
 
 function upload_data() {
     NSpinner.show();
-    console.log("==========================sss==========================");
-    console.log(window.colName);
-    var target_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port + '/insert_excel_data';
+    // console.log("==========================sss==========================");
+    // console.log(window.colName);
+    var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
+    var target_url = host_url + '/insert_excel_data';
     var form = new FormData();
     form.append('col_arr', JSON.stringify(window.colName));
     form.append('data', JSON.stringify(window.contentData));
@@ -210,8 +211,15 @@ function upload_data() {
         flag += 1;
         if (flag == 3) {
             console.log("上传完成");
-            console.log(result);
+            var train_flag = JSON.parse(result.responseText)['train_flag']
             NSpinner.hide();
+            if (train_flag == 1) {
+                var oReq = new XMLHttpRequest();
+                oReq.open("GET", host_url + '/training');
+                oReq.send();
+                alert("上传数据中发现有人工标注的不合格样本，根据上传的新数据已重新选取数据训练，详情可到Models页面查看！");
+            }
         }
     });
 }
+
