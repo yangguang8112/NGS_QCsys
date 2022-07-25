@@ -25,7 +25,8 @@ import warnings
 warnings.filterwarnings("ignore")
 # import project utils
 # import seqQscorer.utils.Exceptions as myExceptions
-import seqQscorer.utils.utils as utils
+# import seqQscorer.utils.utils as utils
+import model_utils.utils as utils
 # import seqQscorer.utils.parser as parser
 # import seqQscorer.utils.custom_metrics as cm
 

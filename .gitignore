@@ -1,6 +1,6 @@
 *.pyc
 __pycache__/
-instance/
-model/
-uploads/
+instance/*.sqlite
+model/*.model
+uploads/*
 pheweb/
