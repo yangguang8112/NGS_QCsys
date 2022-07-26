@@ -58,3 +58,32 @@ async function delect_select_model() {
     await sleep(300);
     window.location.href = host_url + '/models_page';
 }
+
+async function set_current_select_model() {
+    var select_ids = [];
+    var checked_num = 0;
+    for(var i=1; i<input.length;i++){
+        if(input[i].checked==true) {
+            var list = tr[i].getElementsByTagName("td");
+            select_ids.splice(0,0,list[1].innerHTML);
+            checked_num ++;
+        }
+    }
+    console.log(select_ids);
+    if (checked_num > 1) {
+        alert("只能选一个呀！！！");
+    } else {
+        var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
+        var target_url = host_url + '/update_current_model';
+        var form = new FormData(), 
+                url = target_url
+        form.append('select_ids', select_ids);
+        var xhr = new XMLHttpRequest();
+        xhr.open("post", url, true);
+        xhr.send(form);
+        // console.log("sendddddddddddddddd");
+        await sleep(300);
+        window.location.href = host_url + '/models_page';
+    }
+
+}

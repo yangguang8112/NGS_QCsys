@@ -74,7 +74,7 @@ function show_table(col_arr) {
 
 
 $(function() {
-    const target = document.querySelector('div.target');
+    const target = document.querySelector('div.dropzone');
 
     target.addEventListener('paste', (event) => {
         if (event.clipboardData || event.originalEvent) {
@@ -190,8 +190,38 @@ function return_col_num() {
 function upload() {
     const box = document.getElementById("upload_data");
 
-    box.innerHTML = "<button class=\"button-1\" role=\"button\" onclick=\"upload_data()\">上传</button>"
+    box.innerHTML = "<button class=\"button-1\" role=\"button\" onclick=\"upload_data()\">上传</button>   <button class=\"button-1\" role=\"button\" onclick=\"predict_sample()\">预测</button>"
 }
+
+function new_window(pred_res_str) {
+    window.open('predict_result_page/'+pred_res_str, 'Predict Result', 'location=no, toolbar=no, height=400, width=600');
+    return false;
+}
+
+function predict_sample() {
+    NSpinner.show();
+    var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
+    var target_url = host_url + '/predict_samples';
+    var form = new FormData();
+    form.append('col_arr', JSON.stringify(window.colName));
+    form.append('data', JSON.stringify(window.contentData));
+    var xhr = new XMLHttpRequest();
+    xhr.open("post", target_url, true)
+    xhr.send(form);
+    var flag = 0
+    xhr.addEventListener("readystatechange", function() {
+        var result = xhr;
+        flag += 1;
+        if (flag == 3) {
+            console.log("预测完成");
+            var pred_res = JSON.parse(result.responseText)
+            NSpinner.hide();
+            console.log(pred_res);
+            new_window(result.responseText);
+        }
+    });
+}
+
 
 function upload_data() {
     NSpinner.show();

@@ -2,24 +2,25 @@ from calendar import c, month
 from lib2to3.pgen2.pgen import generate_grammar
 from ossaudiodev import control_names
 from statistics import mode
-from this import d
+# from this import d
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for, Flask
+    Blueprint, current_app, flash, g, redirect, render_template, request, url_for, Flask
 )
 from werkzeug.exceptions import abort
 
 from flaskr.db import get_db
-import datetime
+# import datetime
 import pandas as pd
 from flaskr.insert_data import get_score
 import sys
 from werkzeug.utils import secure_filename
 import os
 import random
-from model import generate_training_info, pred_one, training_model
-import requests
+from model import generate_training_info, pred_one, pred_samples, training_model
+# import requests
 import flask
 import json
+import re
 
 
 bp = Blueprint('main_page', __name__, template_folder='templates', static_folder='static')
@@ -79,7 +80,7 @@ def insert_model_info(post_form):
     print("========================================")
     db_insert_model = get_db()
     table_info = db_insert_model.execute('PRAGMA table_info(models_info)').fetchall()
-    col_names = [x[1] for x in table_info][1:-1]
+    col_names = [x[1] for x in table_info][1:-2]
     sql_code = '''INSERT INTO models_info ({col_names}) VALUES ({values})'''.format(col_names=",".join(col_names), values=",".join(['?'] * len(col_names)))
     print(sql_code)
     db_insert_model.execute(sql_code, [form[x] for x in col_names])
@@ -98,10 +99,27 @@ def update_model_info(update_info):
     # db_update.close()
     return "Done"
 
+@bp.route('/update_current_model', methods=['POST'])
+def update_current_model():
+    ids_info = request.form['select_ids']
+    current_id = re.findall(r'<div.*?>(.*?)</div>', ids_info)[0]
+    # print(current_id)
+    db = get_db()
+    raws = db.execute("SELECT * FROM models_info WHERE current_model = 1").fetchall()
+    if len(raws) > 0:
+        for raw in raws:
+            db.execute("UPDATE models_info SET current_model = 0 WHERE id = {}".format(raw['id']))
+    db.execute("UPDATE models_info SET current_model = 1 WHERE id = {}".format(current_id))
+    db.commit()
+    db.close()
+    return "done"  
+    
 
 @bp.route('/remove_models', methods=['POST'])
 def remove_models():
-    ids = request.form['select_ids'].split(',')
+    # ids = request.form['select_ids'].split(',')
+    ids = re.findall(r'<div.*?>(.*?)</div>', request.form['select_ids'])
+    # print(ids)
     db = get_db()
     for id in ids:
         db.execute('DELETE FROM models_info WHERE id = {id}'.format(id=id))
@@ -305,6 +323,29 @@ def insert_excel_data():
     train_flag = insert_from_execl(col_name, data)
     return {"insert_status": 1, "train_flag": train_flag}
 
+
+@bp.route('/predict_samples', methods=['POST'])
+def predict_samples():
+    db = get_db()
+    current_model_name = db.execute("SELECT * FROM models_info WHERE current_model == 1;").fetchone()['model_name']
+    db.close()
+    current_model_path = "model/{}.model".format(current_model_name)
+    col_name = json.loads(request.form['col_arr'])
+    data = json.loads(request.form['data'])
+    pred_res = pred_samples(col_name, data, model_path=current_model_path)
+    return pred_res
+
+@bp.route('/predict_result_page/<pred_res>')
+def predict_result_page(pred_res):
+    res = json.loads(pred_res)
+    print(res)
+    print("=======")
+    res["yesno"] = []
+    for y, n in zip(res['probas_yes'], res['probas_no']):
+        res["yesno"].append([y, n])
+    return render_template('predict_result.html', pred_res=res)
+
+
 @bp.route('/find_samples')
 def find_samples():
     sampleIDs = request.args.get("sampleIDs")
@@ -349,8 +390,10 @@ def random_page():
     random_id = random.choice([raw['id'] for raw in id_list])
     del id_list
     raw = db.execute("SELECT * FROM sample_all_info WHERE id == %d;" % random_id).fetchone()
+    current_model_name = db.execute("SELECT * FROM models_info WHERE current_model == 1;").fetchone()['model_name']
     db.close()
-    pred, probas = pred_one(raw)
+    current_model_path = "model/{}.model".format(current_model_name)
+    pred, probas = pred_one(raw, current_model_path)
     pred = pred.tolist()
     probas = probas[0].tolist()
     col_names = raw.keys()

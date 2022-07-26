@@ -1,0 +1,41 @@
+<!-- {{ pred_res }} -->
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+    <script src="{{ url_for('.static', filename='echarts.js') }}"></script>
+  </head>
+  <body>
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        // var data = JSON.parse("{{ pred_res }}");
+        var preds = JSON.parse("{{ pred_res.preds }}");
+        var probas_no = JSON.parse("{{ pred_res.probas_no }}");
+        var probas_yes = JSON.parse("{{ pred_res.probas_yes }}");
+        var sample_id = JSON.parse("{{ pred_res.sample_id }}");
+        var yesno = JSON.parse("{{ pred_res.yesno }}");
+        console.log(yesno.length);
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+        xAxis: {},
+        yAxis: {},
+        series: [
+            {
+            symbolSize: yesno.length,
+            data: yesno,
+            type: 'scatter'
+            }
+        ]
+        };
+
+        option && myChart.setOption(option);
+    </script>
+  </body>
+</html>

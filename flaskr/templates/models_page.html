@@ -70,6 +70,7 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         <th>Perform In 1w</th>
         <th>Training Status</th>
         <th>Use data IDs</th>
+        <th>Current Model</th>
     </tr>
     </thead>
     <tbody>
@@ -79,7 +80,7 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         {% for value in values %}
         {%if loop.index == 7 and value == "Training" %}
         <td><div class="progress">
-            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 90%">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
               <span class="sr-only">45% Complete</span>
             </div>
         </div></td>
@@ -93,6 +94,7 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 </table>
 
 <button class="button-1" role="button" onclick="delect_select_model()">删除</button>
+<button class="button-1" role="button" onclick="set_current_select_model()">改变当前使用模型</button>
 
 
 

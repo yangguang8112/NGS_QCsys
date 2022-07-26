@@ -17,6 +17,37 @@
         height: 10rem;
         background-color: #e9eef1;
     }
+
+    div.dropzone {
+    border: 3px dashed steelblue;
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eee;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+    color: #444;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: relative;
+}
+
+    div.dropzone:hover {
+        background-color: #f3f3f3;
+        color: #333;
+    }
+
+    div.dropzone input[type=file] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    div.dropzone-drag {
+        background-color: palegreen;
+    }
 </style>
 
 {% endblock %}
@@ -31,20 +62,11 @@
 {% block contained %}
 
 
-
-
-
-
-</br>
 </br>
 
-<div class="target" contenteditable="false">
-    从Excel中复制粘贴或者把Excel文件拖拽进来
-</div>
-</br>
 <div id="upload_data">
-
 </div>
+
 
 </br>
 <div class="row stream_table_row" id="paste_data">
@@ -53,7 +75,9 @@
 
 
 
-
+<div class="dropzone" contenteditable="false">
+    从Excel中复制粘贴或者把Excel文件拖拽进来
+</div>
 
 
 {% endblock %}

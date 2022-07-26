@@ -12,6 +12,7 @@ CREATE TABLE models_info (
     perform_in_1w TEXT NOT NULL,
     training_status TEXT NOT NULL,
     use_data_ids TEXT NOT NULL,
+    current_model INTEGER DEFAULT 0,
     created TIMESTAMP DEFAULT (datetime('now','localtime'))
 );
 

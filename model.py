@@ -1,5 +1,6 @@
 import pickle
 import numpy as np
+import pandas as pd
 
 
 
@@ -16,6 +17,32 @@ def pred_one(one_sample, model_path=MODEL_PATH):
     preds = clf.predict(data)
     probas = clf.predict_proba(data)
     return preds, probas
+
+def pred_samples(raw_col_names, data, model_path=MODEL_PATH):
+    with open(model_path, "rb") as f:
+        clf = pickle.load(f)
+    col_name = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_').replace('（', '_').replace('）', '_').replace('>', '_gt_').replace('<', '_le_').replace('μ', 'u') for f in raw_col_names]
+    col_name = [f if not f[0].isdigit() else '_'+f for f in col_name]
+    df_data = {}
+    for index, col in enumerate(col_name):
+        df_data[col] = []
+        for d in data:
+            df_data[col].append(d[index])
+    df = pd.DataFrame(df_data)
+    # print(df)
+    input_data = df[features]
+    input_data.fillna(0)
+    # input_data = StandardScaler().fit_transform(input_data)
+    print(input_data)
+    preds = clf.predict(input_data)
+    probas = clf.predict_proba(input_data)
+    probas_NO = probas[:, 0]
+    probas_YES = probas[:, 1]
+    # print(probas)
+    res = {'sample_id': df['sample_ID'].tolist(), 'preds': preds.tolist(), 'probas_yes': probas_YES.tolist(), 'probas_no': probas_NO.tolist()}
+    print(res)
+    return res
+
 
 
 import random
