@@ -87,3 +87,12 @@ async function set_current_select_model() {
     }
 
 }
+
+function new_window(pred_res_str) {
+    window.open('dotplot/'+pred_res_str, 'Predict Result', 'location=no, toolbar=no, height=400, width=600');
+    return false;
+}
+
+function dotplot(all_data_str) {
+    new_window(all_data_str);
+}

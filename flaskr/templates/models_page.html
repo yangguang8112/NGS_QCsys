@@ -74,7 +74,7 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
     </tr>
     </thead>
     <tbody>
-    {% for values in data %}
+    {% for values, perform_in_1w_one in zip(data, perform_in_1w) %}
     <tr>
         <td><input type="checkbox" ></td>
         {% for value in values %}
@@ -84,6 +84,8 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
               <span class="sr-only">45% Complete</span>
             </div>
         </div></td>
+        {%elif loop.index == 6 %}
+        <td><button class="button-1" role="button" onclick="dotplot('{{ value }}')">{{ perform_in_1w_one }}</button></td>
         {% else %}
         <td><div class="f-els3" title='{{ value }}'>{{ value }}</div></td>
         {% endif %}

@@ -1,4 +1,5 @@
 import pickle
+import re
 import numpy as np
 import pandas as pd
 
@@ -43,6 +44,27 @@ def pred_samples(raw_col_names, data, model_path=MODEL_PATH):
     print(res)
     return res
 
+
+def pred_11611_samples(model):
+    clf = model
+    DATA_FILE = './uploads/PQC_11611.process.xls'
+    df = pd.read_table(DATA_FILE)
+    col_name = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_').replace('（', '_').replace('）', '_').replace('>', '_gt_').replace('<', '_le_').replace('μ', 'u') for f in df.columns]
+    col_name = [f if not f[0].isdigit() else '_'+f for f in col_name]
+    df.columns = col_name
+    df = df[features]
+    new_df = StandardScaler().fit_transform(df)
+    new_df = df.fillna(0)
+    preds = clf.predict(new_df)
+    probas = clf.predict_proba(new_df)
+    df['preds'] = preds
+    df['probas_no'] = probas[:, 0]
+    df['probas_yes'] = probas[:, 1]
+    res_df = df[['preds', 'probas_no', 'probas_yes']]
+    print(res_df)
+    res = {'preds': res_df['preds'].tolist(), 'probas_no': res_df['probas_no'].tolist(), 
+           'probas_yes': res_df['probas_yes'].tolist(), 'bad_samples_index': list(res_df[res_df['preds'] == 0].index)}
+    return res
 
 
 import random
@@ -187,12 +209,13 @@ def training_model(data_df, model_name):
     # train again all all samples, then serialize
     model = clf_setup.fit(X,y)
     pickle.dump(model, open(model_file_path, 'wb'))
+    perform_in_1w = pred_11611_samples(model)
     return {
         'model_name': model_name,
         'features': json.dumps(features),
         'base_model_name': best_clf,
         'valid_set_perform': json.dumps(metrics_res),
-        'perform_in_1w': '-',
+        'perform_in_1w': json.dumps(perform_in_1w),
         'training_status': 'Done',
         'use_data_ids': json.dumps(df['id'].tolist())
     }

@@ -2,6 +2,7 @@ from calendar import c, month
 from lib2to3.pgen2.pgen import generate_grammar
 from ossaudiodev import control_names
 from statistics import mode
+from warnings import warn_explicit
 # from this import d
 from flask import (
     Blueprint, current_app, flash, g, redirect, render_template, request, url_for, Flask
@@ -43,6 +44,7 @@ def training():
     bad_num = len(bad_samples)
     print(bad_num)
     good_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'YES' LIMIT %d" % (5000-bad_num)).fetchall()
+    print(len(good_samples))
     col_names = good_samples[0].keys()
     data = {}
     for col in col_names:
@@ -72,7 +74,32 @@ def models_page():
     data = []
     for d in table_data:
         data.append([d[col] for col in col_names])
-    return render_template('models_page.html', col_names=col_names, data=data)
+    perform_in_1w = []
+    for d in table_data:
+        if d['perform_in_1w'] == '-':
+            perform_in_1w.append(d['perform_in_1w'])
+        else:
+            d = json.loads(d['perform_in_1w'])
+            bad_num = len([1 for i in d['preds'] if i == 0])
+            good_num = len(d['preds']) - bad_num
+            # perform_in_1w.append("rejected: {}, accept: {}".format(bad_num, good_num))
+            perform_in_1w.append("{}/{}".format(bad_num, good_num))
+    return render_template('models_page.html', col_names=col_names, data=data, perform_in_1w=perform_in_1w, zip=zip)
+
+@bp.route('/dotplot/<data>')
+def dotplot(data):
+    pred_res = json.loads(data)
+    pred_res["yesno"] = []
+    for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
+        if y <= n:
+            pred_res["yesno"].append([y, n])
+    rest_num = 200 - len(pred_res["yesno"])
+    for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
+        if y > n and rest_num > 0:
+            rest_num -= 1
+            pred_res["yesno"].append([y, n])
+    # print(pred_res["yesno"])
+    return render_template('dotplot.html', pred_res=pred_res["yesno"])
 
 # @bp.route('/insert_model_info', methods=['POST'])
 def insert_model_info(post_form):
@@ -343,7 +370,7 @@ def predict_result_page(pred_res):
     res["yesno"] = []
     for y, n in zip(res['probas_yes'], res['probas_no']):
         res["yesno"].append([y, n])
-    return render_template('predict_result.html', pred_res=res)
+    return render_template('dotplot.html', pred_res=res["yesno"])
 
 
 @bp.route('/find_samples')

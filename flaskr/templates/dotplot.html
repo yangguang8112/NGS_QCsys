@@ -1,4 +1,4 @@
-<!-- {{ pred_res }} -->
+
 
 
 <!DOCTYPE html>
@@ -13,11 +13,11 @@
     <div id="main" style="width: 600px;height:400px;"></div>
     <script type="text/javascript">
         // var data = JSON.parse("{{ pred_res }}");
-        var preds = JSON.parse("{{ pred_res.preds }}");
-        var probas_no = JSON.parse("{{ pred_res.probas_no }}");
-        var probas_yes = JSON.parse("{{ pred_res.probas_yes }}");
-        var sample_id = JSON.parse("{{ pred_res.sample_id }}");
-        var yesno = JSON.parse("{{ pred_res.yesno }}");
+        // var preds = JSON.parse("{{ pred_res.preds }}");
+        // var probas_no = JSON.parse("{{ pred_res.probas_no }}");
+        // var probas_yes = JSON.parse("{{ pred_res.probas_yes }}");
+        // var sample_id = JSON.parse("{{ pred_res.sample_id }}");
+        var yesno = JSON.parse("{{ pred_res }}");
         console.log(yesno.length);
         var chartDom = document.getElementById('main');
         var myChart = echarts.init(chartDom);
