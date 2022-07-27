@@ -78,22 +78,26 @@ async function set_current_select_model() {
         }
     }
     console.log(select_ids);
-    if (checked_num > 1) {
-        alert("只能选一个呀！！！");
+    if (checked_num == 0) {
+        alert("选一个再点啊！！！");
     } else {
-        var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
-        var target_url = host_url + '/update_current_model';
-        var form = new FormData(), 
-                url = target_url
-        form.append('select_ids', select_ids);
-        var xhr = new XMLHttpRequest();
-        xhr.open("post", url, true);
-        xhr.send(form);
-        // console.log("sendddddddddddddddd");
-        await sleep(300);
-        window.location.href = host_url + '/models_page';
+        if (checked_num > 1) {
+            alert("只能选一个呀！！！");
+        } else {
+            var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
+            var target_url = host_url + '/update_current_model';
+            var form = new FormData(), 
+                    url = target_url
+            form.append('select_ids', select_ids);
+            var xhr = new XMLHttpRequest();
+            xhr.open("post", url, true);
+            xhr.send(form);
+            // console.log("sendddddddddddddddd");
+            await sleep(300);
+            window.location.href = host_url + '/models_page';
+        }
     }
-
+    
 }
 
 function new_window(pred_res_str) {
@@ -133,4 +137,12 @@ function compare_models() {
         
     }
     
+}
+
+function train_new_window() {
+    window.open('train_new_model', 'train', 'location=no, toolbar=no, height=805, width=805');
+}
+
+function train_new_model() {
+    train_new_window();
 }

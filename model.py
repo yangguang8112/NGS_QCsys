@@ -45,7 +45,7 @@ def pred_samples(raw_col_names, data, model_path=MODEL_PATH):
     return res
 
 
-def pred_11611_samples(model):
+def pred_11611_samples(model, features=features):
     clf = model
     DATA_FILE = './uploads/PQC_11611.process.xls'
     df = pd.read_table(DATA_FILE)
@@ -87,9 +87,8 @@ from collections import Counter
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import StandardScaler
 
-def generate_training_info(data_df):
+def generate_training_info(data_df, best_clf='RFC', features=features):
     df = data_df
-    best_clf = 'RFC'
     model_name = "{best_clf}_{sample_num}_{time}".format(best_clf=best_clf, 
                                                          sample_num=df.shape[0],
                                                          time=int(time.time()))
@@ -105,7 +104,7 @@ def generate_training_info(data_df):
 
 
 
-def training_model(data_df, model_name):
+def training_model(data_df, model_name, best_clf='RFC', features=features):
     df = data_df
     col_name = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_').replace('（', '_').replace('）', '_').replace('>', '_gt_').replace('<', '_le_').replace('μ', 'u') for f in df.columns]
     col_name = [f if not f[0].isdigit() else '_'+f for f in col_name]
@@ -209,7 +208,7 @@ def training_model(data_df, model_name):
     # train again all all samples, then serialize
     model = clf_setup.fit(X,y)
     pickle.dump(model, open(model_file_path, 'wb'))
-    perform_in_1w = pred_11611_samples(model)
+    perform_in_1w = pred_11611_samples(model, features=features)
     return {
         'model_name': model_name,
         'features': json.dumps(features),

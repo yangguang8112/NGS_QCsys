@@ -1,0 +1,81 @@
+<html>
+
+<head>
+    <script src="https://unpkg.com/jquery@1.12.4/dist/jquery.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function submit() {
+            var options=$("#base_model option:selected");
+            console.log(options.val());
+            var base_model = options.val();
+
+            var features = [];
+            $('input[name="feature"]:checked').each(function(){
+                features.push($(this).val());
+            });
+            console.log(features);
+            if (features.length == 0) {
+                alert("一个都不选让我怎么train");
+            } else {
+                var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
+                var target_url = host_url + '/custom_training';
+                var form = new FormData()
+                form.append('base_model', base_model);
+                form.append('features', features);
+                var xhr = new XMLHttpRequest();
+                xhr.open("post", target_url, true);
+                xhr.send(form);
+                // alert("Traininggggggggg");
+                await sleep(700);
+                // 刷新父窗口
+                self.opener.location.reload();
+                window.opener.location.reload();
+                // 关闭子窗口
+                this.close();
+                // await sleep(300);
+                // window.location.href = host_url + '/models_page';
+            }
+        }
+    </script>
+</head>
+
+
+
+
+<body>
+
+<p>Base Model</p>
+<select id="base_model">
+    {% for va in base_models %}
+    <option value ="{{ va }}">{{ va }}</option>
+    {% endfor %}
+</select>
+
+
+
+
+<p>Feature Selected</p>
+<form id="features">
+    {% for f in f3 %}
+    <input type="checkbox" name="feature" value="{{f}}">{{f}}
+    {%endfor%}
+    <br>
+    <br>
+    {% for f in f2 %}
+    <input type="checkbox" name="feature" value="{{f}}">{{f}}
+    {%endfor%}
+    <br>
+    <br>
+    {% for f in f1 %}
+    <input type="checkbox" name="feature" value="{{f}}">{{f}}
+    {%endfor%}
+</form>
+
+<button class="button-1" role="button" onclick="submit()">Training</button>
+</body>
+
+
+</html>
