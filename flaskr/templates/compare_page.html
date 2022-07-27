@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <!-- 引入刚刚下载的 ECharts 文件 -->
+    <script src="{{ url_for('.static', filename='echarts.js') }}"></script>
+    <script src="{{ url_for('.static', filename='venn/venn.js') }}"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="venn" style="width: 600px;height:400px;"></div>
+    <div id="bar" style="width: 600px;height:400px;"></div>
+    <script type="text/javascript">
+        var venn_data = JSON.parse("{{ venn_data }}")
+        // console.log(venn_data);
+        var sets = [];
+        for (let i=0;i < venn_data.length;i++){
+            sets.splice(0, 0, {sets: venn_data[i][0], size: venn_data[i][1]});
+        }
+        // console.log(sets);
+        // var sets = [ {sets: ['A'], size: 12}, 
+        //      {sets: ['B'], size: 12},
+        //      {sets: ['A','B'], size: 2}];
+
+    var chart = venn.VennDiagram()
+    d3.select("#venn").datum(sets).call(chart);
+    </script>
+    <script type="text/javascript">
+        var bar_data_json = JSON.parse('{{ bar_data|tojson }}');
+        var series_data = [];
+        for (var i=1;i < bar_data_json[0].length;i++) {
+            series_data.splice(0, 0, { type: 'bar' })
+        }
+        // console.log(bar_data_json);
+        var chartDom = document.getElementById('bar');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+        legend: {},
+        tooltip: {},
+        dataset: {
+            source: bar_data_json
+        },
+        xAxis: { type: 'category' },
+        yAxis: {},
+        // Declare several bar series, each will be mapped
+        // to a column of dataset.source by default.
+        series: series_data
+        };
+
+        option && myChart.setOption(option);
+    </script>
+  </body>
+</html>

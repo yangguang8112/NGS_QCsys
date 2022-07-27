@@ -86,6 +86,8 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
         </div></td>
         {%elif loop.index == 6 %}
         <td><button class="button-1" role="button" onclick="dotplot('{{ value }}')">{{ perform_in_1w_one }}</button></td>
+        {%elif loop.index == 1 %}
+        <td>{{ value }}</td>
         {% else %}
         <td><div class="f-els3" title='{{ value }}'>{{ value }}</div></td>
         {% endif %}
@@ -95,8 +97,9 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
     </tbody>
 </table>
 
-<button class="button-1" role="button" onclick="delect_select_model()">删除</button>
-<button class="button-1" role="button" onclick="set_current_select_model()">改变当前使用模型</button>
+<button class="button-1" role="button" onclick="delect_select_model()">Delete Models</button>
+<button class="button-1" role="button" onclick="set_current_select_model()">Set Current Model</button>
+<button class="button-1" role="button" onclick="compare_models()">Compare Models</button>
 
 
 

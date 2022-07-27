@@ -89,10 +89,40 @@ async function set_current_select_model() {
 }
 
 function new_window(pred_res_str) {
-    window.open('dotplot/'+pred_res_str, 'Predict Result', 'location=no, toolbar=no, height=400, width=600');
+    window.open('dotplot/'+pred_res_str, 'Predict Result', 'location=no, toolbar=no, height=405, width=605');
     return false;
 }
 
 function dotplot(all_data_str) {
     new_window(all_data_str);
+}
+
+
+function compare_new_window(ids_str) {
+    window.open('compare_page/'+ids_str, 'compare', 'location=no, toolbar=no, height=805, width=605');
+}
+
+function compare_models() {
+    var select_ids = [];
+    var checked_num = 0;
+    for(var i=1; i<input.length;i++){
+        if(input[i].checked==true) {
+            var list = tr[i].getElementsByTagName("td");
+            select_ids.splice(0,0,list[1].innerHTML);
+            checked_num ++;
+        }
+    }
+    if (checked_num < 2) {
+        alert("至少要选两个啊！！！！");
+    } 
+    else {
+        if (checked_num > 10) {
+            alert("选太多啦！！！");
+        } else {
+            // console.log(select_ids);
+            compare_new_window(select_ids);
+        }
+        
+    }
+    
 }

@@ -41,7 +41,7 @@ def pred_samples(raw_col_names, data, model_path=MODEL_PATH):
     probas_YES = probas[:, 1]
     # print(probas)
     res = {'sample_id': df['sample_ID'].tolist(), 'preds': preds.tolist(), 'probas_yes': probas_YES.tolist(), 'probas_no': probas_NO.tolist()}
-    print(res)
+    # print(res)
     return res
 
 
@@ -204,7 +204,7 @@ def training_model(data_df, model_name):
         tmp = [np.mean(metrics[metric][dt]) for dt in range(1,10)]
         metrics_res[metric] = sum(tmp) / len(tmp)
     utils.print_nice_table(table)
-    print(metrics_res)
+    # print(metrics_res)
 
     # train again all all samples, then serialize
     model = clf_setup.fit(X,y)

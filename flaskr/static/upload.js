@@ -194,7 +194,7 @@ function upload() {
 }
 
 function new_window(pred_res_str) {
-    window.open('predict_result_page/'+pred_res_str, 'Predict Result', 'location=no, toolbar=no, height=400, width=600');
+    window.open('predict_result_page/'+pred_res_str, 'Predict Result', 'location=no, toolbar=no, height=405, width=605');
     return false;
 }
 
