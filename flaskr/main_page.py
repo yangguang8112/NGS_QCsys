@@ -135,17 +135,18 @@ def compare_page(select_ids):
         perform_in_1w.append(json.loads(raw['perform_in_1w']))
         valid_set_perform.append(json.loads(raw['valid_set_perform']))
         models_name.append(raw['model_name'])
-    select_ids = [int(i) for i in select_ids]
+    # select_ids = [int(i) for i in select_ids]
     print(valid_set_perform[0].keys())
     venn_data = []
     for w in perform_in_1w:
         venn_data.append(w['bad_samples_index'])
+    select_ids = ["id:{}".format(i) for i in select_ids]
     venn_data = build_venn_data(select_ids, venn_data)
-    # print(venn_data)
+    print(venn_data)
     bar_data = [['metric'] + list(valid_set_perform[0].keys())]
     for model_name, data in zip(models_name, valid_set_perform):
         bar_data.append([model_name] + [data[k] for k in bar_data[0][1:]])
-    print(bar_data)
+    # print(bar_data)
     return render_template("compare_page.html", venn_data=venn_data, bar_data=bar_data)
 
 # @bp.route('/insert_model_info', methods=['POST'])
@@ -177,7 +178,7 @@ def update_model_info(update_info):
 def update_current_model():
     # ids_info = request.form['select_ids']
     # current_id = re.findall(r'<div.*?>(.*?)</div>', ids_info)[0]
-    current_id = request.form['select_ids'].split(',')
+    current_id = request.form['select_ids'].split(',')[0]
     # print(current_id)
     db = get_db()
     raws = db.execute("SELECT * FROM models_info WHERE current_model = 1").fetchall()

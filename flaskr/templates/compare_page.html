@@ -12,7 +12,7 @@
     <div id="venn" style="width: 600px;height:400px;"></div>
     <div id="bar" style="width: 600px;height:400px;"></div>
     <script type="text/javascript">
-        var venn_data = JSON.parse("{{ venn_data }}")
+        var venn_data = JSON.parse('{{ venn_data|tojson }}')
         // console.log(venn_data);
         var sets = [];
         for (let i=0;i < venn_data.length;i++){

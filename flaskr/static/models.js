@@ -45,18 +45,26 @@ async function delect_select_model() {
         }
     }
     // console.log(select_ids);
+    if (select_ids.length == 0) {
+        alert("至少选一个吧！！！");
+    } else {
+        var r = confirm("确认删除吗？");
+        if (r == true) {
+            var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
+            var target_url = host_url + '/remove_models';
+            var form = new FormData(), 
+                    url = target_url
+            form.append('select_ids', select_ids);
+            var xhr = new XMLHttpRequest();
+            xhr.open("post", url, true);
+            xhr.send(form);
+            // console.log("sendddddddddddddddd");
+            await sleep(300);
+            window.location.href = host_url + '/models_page';
+        }
+    }
 
-    var host_url = window.location.protocol +'//' + window.location.hostname + ':' + window.location.port;
-    var target_url = host_url + '/remove_models';
-    var form = new FormData(), 
-            url = target_url
-    form.append('select_ids', select_ids);
-    var xhr = new XMLHttpRequest();
-    xhr.open("post", url, true);
-    xhr.send(form);
-    // console.log("sendddddddddddddddd");
-    await sleep(300);
-    window.location.href = host_url + '/models_page';
+    
 }
 
 async function set_current_select_model() {
