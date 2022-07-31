@@ -8,6 +8,7 @@ from warnings import warn_explicit
 from flask import (
     Blueprint, current_app, flash, g, redirect, render_template, request, url_for, Flask
 )
+from numpy import choose
 from werkzeug.exceptions import abort
 
 from flaskr.db import get_db
@@ -41,6 +42,16 @@ BASE_MODELS = ['RFC', 'GBC', 'LRN', 'SVC', 'GNB', 'MLP', 'ADT', 'ETC']
 def homepage():
     # return render_template('layout.html')
     return render_template('mainpage.html')
+
+@bp.route('/visual_data')
+def visual_data():
+    db = get_db()
+    choose_features = ['_100X_Coverage_pct']
+    raws = []
+    for f in choose_features:
+        raws.append(db.execute("SELECT {} FROM sample_all_info".format(",".join(choose_features))))
+    return render_template('visual_data.html')
+
 
 def get_training_data():
     db = get_db()
