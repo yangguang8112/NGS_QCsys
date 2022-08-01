@@ -116,7 +116,17 @@ def models_page():
     db.close()
     data = []
     for d in table_data:
-        data.append([d[col] for col in col_names])
+        tmp = []
+        for index, col in enumerate(col_names):
+            if index == 4:
+                if d[col] != '-':
+                    v = list(json.loads(d[col]).values())
+                    tmp.append("%.4f/%.4f/%.4f/%.4f" % (v[0], v[1], v[2], v[3]))
+                else:
+                    tmp.append("-")
+            else:
+                tmp.append(d[col])
+        data.append(tmp)
     perform_in_1w = []
     for d in table_data:
         if d['perform_in_1w'] == '-':
@@ -136,7 +146,7 @@ def dotplot(data):
     for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
         if y <= n:
             pred_res["yesno"].append([y, n])
-    rest_num = 200 - len(pred_res["yesno"])
+    rest_num = 1000 - len(pred_res["yesno"])
     for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
         if y > n and rest_num > 0:
             rest_num -= 1
@@ -444,12 +454,14 @@ def insert_excel_data():
 @bp.route('/predict_samples', methods=['POST'])
 def predict_samples():
     db = get_db()
-    current_model_name = db.execute("SELECT * FROM models_info WHERE current_model == 1;").fetchone()['model_name']
+    current_model_info = db.execute("SELECT * FROM models_info WHERE current_model == 1;").fetchone()
+    current_model_name = current_model_info['model_name']
+    current_model_features = json.loads(current_model_info['features'])
     db.close()
     current_model_path = "model/{}.model".format(current_model_name)
     col_name = json.loads(request.form['col_arr'])
     data = json.loads(request.form['data'])
-    pred_res = pred_samples(col_name, data, model_path=current_model_path)
+    pred_res = pred_samples(col_name, data, model_path=current_model_path, features=current_model_features)
     return pred_res
 
 @bp.route('/predict_result_page/<pred_res>')

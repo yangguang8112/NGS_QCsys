@@ -2,7 +2,61 @@
 
 <head>
     <script src="https://unpkg.com/jquery@1.12.4/dist/jquery.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
+    <link href="{{ url_for('.static', filename='NSpinner.css') }}" rel="stylesheet" type="text/css">
+    <script src="{{ url_for('.static', filename='NSpinner.js') }}" type="text/javascript"></script>
     <script>
+        $(function() {
+            let head1=document.getElementById("head1");
+            let f1=document.getElementsByClassName("f1");
+            //全选/全不选
+            head1.onclick=function(){
+                for(let i=0;i<f1.length;i++){
+                    // 如果全选为true那么下面四个列表页都要勾上 否则都不勾
+                    f1[i].checked=this.checked;
+                    
+                }
+            }
+
+            let head2=document.getElementById("head2");
+            let f2=document.getElementsByClassName("f2");
+            //全选/全不选
+            head2.onclick=function(){
+                for(let i=0;i<f2.length;i++){
+                    // 如果全选为true那么下面四个列表页都要勾上 否则都不勾
+                    f2[i].checked=this.checked;
+                    
+                }
+            }
+
+            let head3=document.getElementById("head3");
+            let f3=document.getElementsByClassName("f3");
+            //全选/全不选
+            head3.onclick=function(){
+                for(let i=0;i<f3.length;i++){
+                    // 如果全选为true那么下面四个列表页都要勾上 否则都不勾
+                    f3[i].checked=this.checked;
+                    
+                }
+            }
+            //input都勾时 全选为true，input有一个没勾 全选为false
+        
+            // for(let i=1;i<tr.length;i++){
+                
+            //     tr[i].onclick=function(){
+            //         let flag=true;
+            //         for(let j=1;j<input.length;j++){
+            //         if(input[j].checked==false){
+            //             flag=false;
+            //             break;         
+            //         }
+            //     }
+            //     head.checked=flag;
+            
+            //     }
+            // }
+
+        });
+
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
@@ -29,8 +83,10 @@
                 xhr.open("post", target_url, true);
                 xhr.send(form);
                 // alert("Traininggggggggg");
-                await sleep(700);
+                NSpinner.show();
+                await sleep(1500);
                 // 刷新父窗口
+                NSpinner.hide();
                 self.opener.location.reload();
                 window.opener.location.reload();
                 // 关闭子窗口
@@ -59,18 +115,21 @@
 
 <p>Feature Selected</p>
 <form id="features">
+    <input type="checkbox" name="head1" value="head1" id="head1">
     {% for f in f3 %}
-    <input type="checkbox" name="feature" value="{{f}}">{{f}}
+    <input type="checkbox" name="feature" value="{{f}}" id="f1" class="f1">{{f}}
     {%endfor%}
     <br>
     <br>
+    <input type="checkbox" name="head2" value="head2" id="head2">
     {% for f in f2 %}
-    <input type="checkbox" name="feature" value="{{f}}">{{f}}
+    <input type="checkbox" name="feature" value="{{f}}" id="f2" class="f2">{{f}}
     {%endfor%}
     <br>
     <br>
+    <input type="checkbox" name="head3" value="head3" id="head3">
     {% for f in f1 %}
-    <input type="checkbox" name="feature" value="{{f}}">{{f}}
+    <input type="checkbox" name="feature" value="{{f}}" id="f3" class="f3">{{f}}
     {%endfor%}
 </form>
 

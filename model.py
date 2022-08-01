@@ -19,7 +19,7 @@ def pred_one(one_sample, model_path=MODEL_PATH):
     probas = clf.predict_proba(data)
     return preds, probas
 
-def pred_samples(raw_col_names, data, model_path=MODEL_PATH):
+def pred_samples(raw_col_names, data, model_path=MODEL_PATH, features=features):
     with open(model_path, "rb") as f:
         clf = pickle.load(f)
     col_name = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_').replace('（', '_').replace('）', '_').replace('>', '_gt_').replace('<', '_le_').replace('μ', 'u') for f in raw_col_names]
