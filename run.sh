@@ -9,3 +9,6 @@ export FLASK_APP=flaskr
 export FLASK_ENV=development
 # flask init-db
 flask run -h 0.0.0.0 -p 6868
+
+cd react_module
+npm start

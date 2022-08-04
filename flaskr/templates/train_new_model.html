@@ -71,6 +71,10 @@
                 features.push($(this).val());
             });
             console.log(features);
+
+            var sampleIDs = $('input[name="sampleIDs"]').val();
+            console.log(sampleIDs);
+
             if (features.length == 0) {
                 alert("一个都不选让我怎么train");
             } else {
@@ -79,6 +83,7 @@
                 var form = new FormData()
                 form.append('base_model', base_model);
                 form.append('features', features);
+                form.append('sampleIDsStr', sampleIDs);
                 var xhr = new XMLHttpRequest();
                 xhr.open("post", target_url, true);
                 xhr.send(form);
@@ -132,6 +137,17 @@
     <input type="checkbox" name="feature" value="{{f}}" id="f3" class="f3">{{f}}
     {%endfor%}
 </form>
+
+<p>Sample</p>
+{% block navbar_left %}
+<div class="navbar-left" id="navbar_form_container">
+    <form class="navbar-form" role="search">
+        <div class="form-group" id="navbar-awesomebar">
+            <input id="navbar-searchbox-input" name="sampleIDs" class="form-control typeahead" autocomplete="off" type="text" size="100%" placeholder="输入训练样本ID（直接复制粘贴Excel的就是空格分隔），如果输入样本不够5000例则自动补齐">
+        </div>
+    </form>
+</div>
+{% endblock %}
 
 <button class="button-1" role="button" onclick="submit()">Training</button>
 </body>

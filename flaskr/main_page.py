@@ -102,18 +102,32 @@ def visual_data():
     return render_template('visual_data.html', data=data, choose_features=choose_features, len=len)
 
 
-def get_training_data():
+def get_training_data(sample_list=[]):
     db = get_db()
-    bad_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'NO'").fetchall()
+    choose_bad_num, choose_good_num = 0, 0
+    choose_samples = []
+    if sample_list:
+        sql_query = "SELECT * FROM sample_all_info WHERE sample_code IN {}".format(tuple(sample_list))
+        choose_samples = db.execute(sql_query).fetchall() 
+        for choo in choose_samples:
+            if choo['Judge'] == 'NO':
+                choose_bad_num += 1
+            else:
+                choose_good_num += 1
+
+    print(choose_bad_num, choose_good_num)
+    res_num = 5000 - choose_bad_num - choose_good_num
+    bad_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'NO' AND sample_code NOT IN {} LIMIT {}".format(tuple(sample_list), res_num)).fetchall()
     bad_num = len(bad_samples)
     print(bad_num)
-    good_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'YES' LIMIT %d" % (5000-bad_num)).fetchall()
+    res_num -= bad_num
+    good_samples = db.execute("SELECT * FROM sample_all_info WHERE Judge = 'YES' AND sample_code NOT IN {} LIMIT {}".format(tuple(sample_list), res_num)).fetchall()
     print(len(good_samples))
     col_names = good_samples[0].keys()
     data = {}
     for col in col_names:
         data[col] = []
-        for Raw in bad_samples+good_samples:
+        for Raw in choose_samples + bad_samples+good_samples:
             data[col].append(Raw[col])
     df = pd.DataFrame(data)
     print(df)
@@ -147,8 +161,14 @@ def custom_training():
     db = get_db()
     base_model = request.form['base_model']
     features = request.form['features'].split(',')
-    print(base_model, features)
-    df = get_training_data()
+    sampleIDsStr = request.form['sampleIDsStr']
+    print('========')
+    if sampleIDsStr:
+        sampleIDs = sampleIDsStr.split()
+    else:
+        sampleIDs = []
+    print(sampleIDs)
+    df = get_training_data(sample_list=sampleIDs)
     training_info = generate_training_info(df, best_clf=base_model, features=features)
     _ = insert_model_info(training_info)
     result = training_model(df,training_info['model_name'], best_clf=base_model, features=features)
@@ -268,7 +288,7 @@ def update_model_info(update_info):
     db_update = get_db()
     sql = "UPDATE models_info SET valid_set_perform = '{valid_v}', perform_in_1w = '{w_v}', training_status = '{train_v}' WHERE model_name = '{model_v}'".format(
                 valid_v=update_info['valid_set_perform'], w_v=update_info['perform_in_1w'], train_v=update_info['training_status'], model_v=update_info['model_name'])
-    print(sql)
+    # print(sql)
     db_update.execute(sql)
     db_update.commit()
     # db_update.close()
