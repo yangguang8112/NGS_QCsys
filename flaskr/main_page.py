@@ -4,6 +4,7 @@ from lib2to3.pgen2.pgen import generate_grammar
 from ossaudiodev import control_names
 from statistics import mode
 from warnings import warn_explicit
+from webbrowser import get
 # from this import d
 from flask import (
     Blueprint, current_app, flash, g, redirect, render_template, request, url_for, Flask
@@ -26,6 +27,7 @@ import json
 # import re
 from itertools import combinations
 from functools import reduce
+import numpy as np
 
 
 bp = Blueprint('main_page', __name__, template_folder='templates', static_folder='static')
@@ -43,14 +45,61 @@ def homepage():
     # return render_template('layout.html')
     return render_template('mainpage.html')
 
+def get_hist_data(data_list, bins=100):
+    none_num = len([i for i in data_list if not i])
+    data_list = [i for i in data_list if i]
+    min_num, max_num = min(data_list), max(data_list)
+    xaxis = ['None']
+    x_range = np.arange(min_num, max_num, (max_num - min_num)/bins)
+    xaxis += ["%.3f"%x for x in x_range]
+    data = [none_num]
+    for i in range(len(x_range)-1):
+        data.append(len([x for x in data_list if x_range[i] <= x < x_range[i+1]]))
+    data.append(len([x for x in data_list if x >= x_range[-1]]))
+    return (xaxis, data)
+
+@bp.route('/select_features')
+def select_features():
+    f1 = [x for x in FEATURES if 'SNP' in x or 'SV' in x or 'CNV' in x or 'INDEL' in x]
+    f2 = [x for x in FEATURES if 'Coverage' in x or 'Depth' in x]
+    f3 = list(set(FEATURES) - set(f1 + f2))
+    data = [{'value': x, 'label': x, 'color': '#009879', 'isFixed': True} for x in f3]
+    data += [{'value': x, 'label': x, 'color': '#b31c74', 'isFixed': True} for x in f2]
+    data += [{'value': x, 'label': x, 'color': '#00B8D9', 'isFixed': True} for x in f1]
+    return json.dumps(data)
+
+@bp.route('/react_features_data', methods=['POST'])
+def react_features_data():
+    react_data = json.loads(request.data)
+    if not react_data['features']:
+        return "null"
+    else:
+        # choose_features = [f['value'] for f in react_data['features']]
+        choose_features = react_data['features']
+        db = get_db()
+        raws = []
+        for f in choose_features:
+            raws.append(db.execute("SELECT {} FROM sample_all_info".format(",".join(choose_features))).fetchall())
+        data = []
+        for f, raw in zip(choose_features, raws):
+            data.append([x[f] for x in raw])
+        data = [get_hist_data(x) for x in data]
+        return json.dumps(data)
+
 @bp.route('/visual_data')
 def visual_data():
     db = get_db()
-    choose_features = ['_100X_Coverage_pct']
+    choose_features = ['TotalBases_Gb', 'Max_N_content_pct', 'MismatchRate_pct']
     raws = []
     for f in choose_features:
-        raws.append(db.execute("SELECT {} FROM sample_all_info".format(",".join(choose_features))))
-    return render_template('visual_data.html')
+        raws.append(db.execute("SELECT {} FROM sample_all_info".format(",".join(choose_features))).fetchall())
+    data = []
+    for f, raw in zip(choose_features, raws):
+        data.append([x[f] for x in raw])
+    data = [get_hist_data(x) for x in data]
+    print(data)
+    db.close()
+    return render_template('visual_data.html', data=data, choose_features=choose_features, len=len)
 
 
 def get_training_data():

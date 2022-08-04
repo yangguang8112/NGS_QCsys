@@ -16,9 +16,75 @@
 
 {% block contained %}
 
-<div id="main" style="width: 1200px;height:800px;"></div>
 
+
+
+
+
+{% for i in range(len(data)) %}
+<div id="main{{ i }}" style="width: 1800px;height:400px;"></div>
+{% endfor %}
+
+{% for i in range(len(data)) %}
 <script type="text/javascript">
+    var chartDom = document.getElementById('main'+{{ i }});
+    var myChart = echarts.init(chartDom);
+    var option;
+
+    var xAxisData = {{ data[i][0]|tojson }};
+    var data = {{ data[i][1]|tojson }};
+    var feature_name = "{{ choose_features[i] }}";
+    // console.log(data);
+    option = {
+    title: {
+        text: feature_name + ' distribution'
+    },
+    legend: {
+        data: [feature_name]
+    },
+    toolbox: {
+        // y: 'bottom',
+        feature: {
+        magicType: {
+            type: ['stack']
+        },
+        dataView: {},
+        saveAsImage: {
+            pixelRatio: 2
+        }
+        }
+    },
+    tooltip: {},
+    xAxis: {
+        data: xAxisData,
+        splitLine: {
+        show: false
+        }
+    },
+    yAxis: {},
+    series: [
+        {
+        name: 'bar',
+        type: 'bar',
+        data: data,
+        emphasis: {
+            focus: 'series'
+        },
+        animationDelay: function (idx) {
+            return idx * 10 + {{i}} * 500;
+        }
+        },
+    ],
+    animationEasing: 'elasticOut',
+    animationDelayUpdate: function (idx) {
+        return idx * 5;
+    }
+    };
+
+    option && myChart.setOption(option);
+</script>
+{% endfor %}
+<!-- <script type="text/javascript">
     var chartDom = document.getElementById('main');
     var myChart = echarts.init(chartDom);
     var option;
@@ -89,7 +155,7 @@
     };
 
     option && myChart.setOption(option);
-</script>
+</script> -->
 
 
 {% endblock %}

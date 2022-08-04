@@ -4,3 +4,4 @@ instance/*.sqlite
 model/*.model
 uploads/*
 pheweb/
+node_modules/
