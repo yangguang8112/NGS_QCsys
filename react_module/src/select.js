@@ -37,13 +37,22 @@ export default function AnimatedMulti() {
                         for (let i=0;i<data.length;i++) {
                             colourOptions.push(data[i]);
                         }
+                        // console.log(selectedOption);
                     }
                 )
             );
         }, []);
 
-    
-    const [selectedOption, setSelectedOption] = useState(null);
+    const defaultOption = [
+        {value: 'TotalBases_Gb', label: 'TotalBases_Gb', color: '#009879', isFixed: true},
+        {value: 'Read1_Q30_pct', label: 'Read1_Q30_pct', color: '#009879', isFixed: true}
+    ];
+    const [selectedOption, setSelectedOption] = useState(
+        [
+            {value: 'TotalBases_Gb', label: 'TotalBases_Gb', color: '#009879', isFixed: true},
+            {value: 'Read1_Q30_pct', label: 'Read1_Q30_pct', color: '#009879', isFixed: true}
+        ]
+    );
 
 
     return (
@@ -51,9 +60,9 @@ export default function AnimatedMulti() {
             <div className='AnimatedMulti'>
             <Select
                 closeMenuOnSelect={false}
-                // 动态效果，但是选择的第一个会出现很长的条
-                // components={animatedComponents}
-                defaultValue={[colourOptions[0], colourOptions[1]]}
+                // 动态效果，但是选择的第一个会出现很长的条；有默认选项就不会出现
+                components={animatedComponents}
+                // defaultValue={defaultOption}
                 isMulti
                 options={colourOptions}
                 value={selectedOption}
@@ -123,14 +132,12 @@ function Plot_data(props) {
                             console.log("nooooo");
                         }
                         setFlag(flag + 1);
-                        // console.log(current_plot_data);
                     }
                 )
             );
         }, [props.features]);
     
 
-    // return (<Plotting mainid='main0' data={plot_data} feature={infeatures} flag={flag} />);
     return (
         <div className='EchartsPlot'>
             {Object.keys(current_plot_data).map((f, idx) => (

@@ -22,6 +22,8 @@ echarts.use([BarChart]);
 
 function DistrSelect() {
     const [colourOptions, setdata] = useState([]);
+    const [selectedOption, setSelectedOption] = useState({value: 'TotalBases_Gb', label: 'TotalBases_Gb', color: '#009879', isFixed: true});
+
     useEffect(
         () => {
             fetch("select_features").then(
@@ -31,21 +33,22 @@ function DistrSelect() {
                         for (let i=0;i<data.length;i++) {
                             colourOptions.push(data[i]);
                         }
+                        // setSelectedOption(data[3]);
                     }
                 )
             );
         }, []);
 
     
-    const [selectedOption, setSelectedOption] = useState(null);
-
-
+    
+    
+    // console.log(colourOptions);
     return (
         <div>
             <div className='DistrSelect'>
             <Select
-                closeMenuOnSelect={false}
-                defaultValue={[colourOptions[0]]}
+                // closeMenuOnSelect={false}
+                // defaultValue={colourOptions[1]}
                 // isMulti
                 options={colourOptions}
                 value={selectedOption}
@@ -53,7 +56,7 @@ function DistrSelect() {
             />
             </div>
             <div>
-                {/* <Plot_data features={selectedOption}/> */}
+                <Plot_data features={selectedOption}/>
             </div>
         </div>
     );
@@ -71,58 +74,27 @@ function inArray(inputarray, check_data) {
 
 function Plot_data(props) {
     // console.log(props.features);
-    const [show_plot, setdata] = useState([]);
-    const [plot_data, setPlotdata] = useState(new Array());
-    const [current_plot_data, setCurrentPlotData] = useState(new Array())
-    const [infeatures, setInfeatures] = useState([]);
-    const [current_features, setCurrentFeatures] = useState([]);
-    const [need_fetch, setNeedFetch] = useState([]);
+    const [plot_data, setPlotdata] = useState(null);
     const [flag, setFlag] = useState(0);
 
     useEffect(
         () => {
-            need_fetch.length = 0;
-            infeatures.length = 0;
-            for(var k in current_plot_data){
-                delete current_plot_data[k];
-            }
-            if (props.features) {
-                for (let i=0;i<props.features.length;i++) {
-                    if (! inArray(current_features, props.features[i]['value'])) {
-                        need_fetch.push(props.features[i]['value']);
-                        // console.log(current_features);
-                        current_features.push(props.features[i]['value']);
-                    } else {
-                        current_plot_data[props.features[i]['value']] = plot_data[props.features[i]['value']]
-                    }
-                    // setInfeatures(infeatures => [...infeatures, props.features[i]['value']]);
-                    infeatures.push(props.features[i]['value']);
-                }
-            }
-            // console.log("==========infeatures===========")
-            // console.log(infeatures);
-            
             const requestOptions = {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ features: need_fetch })
+                body: JSON.stringify({ features: [props.features['value']] })
             };
-            console.log(requestOptions);
+            // console.log(requestOptions);
             fetch("react_features_data", requestOptions).then(
                 (res) => res.json().then(
                     (data) => {
                         if (data) {
-                                    // return <Plotting mainid='main0' data={data[0]} feature={props.features[0]} />;
-                            show_plot.push(data[0])
-                            for (let i=0;i<data.length;i++) {
-                                plot_data[need_fetch[i]] = data[i]
-                                current_plot_data[need_fetch[i]] = data[i]
-                            }
+                            setPlotdata(data[0]);
+                            setFlag(flag + 1);
                         } else {
-                            console.log("nooooo");
+                            setFlag(0);
                         }
-                        setFlag(flag + 1);
-                        // console.log(current_plot_data);
+                        
                     }
                 )
             );
@@ -130,14 +102,15 @@ function Plot_data(props) {
     
 
     // return (<Plotting mainid='main0' data={plot_data} feature={infeatures} flag={flag} />);
-    return (
-        <div className='EchartsPlot'>
-            {Object.keys(current_plot_data).map((f, idx) => (
-                // <p>{f}</p>
-                <Plotting mainid={f} data={plot_data[f]} feature={f} flag={flag} />
-            ))}
-        </div>
-    );
+    if (flag > 0) {
+        return (
+            <div className='EchartsPlot'>
+                <Plotting mainid={props.features['value']} data={plot_data} feature={props.features['value']} flag={flag} />
+            </div>
+        );
+    } else {
+    }
+    
     
 }
 
@@ -153,7 +126,7 @@ function Plotting(props) {
                 var feature_name = props.feature;
                 myChart.setOption({
                     title: {
-                        text: feature_name + ' distribution'
+                        // text: feature_name
                     },
                     // legend: {
                     //     data: [feature_name]

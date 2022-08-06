@@ -83,6 +83,7 @@ def react_features_data():
         data = []
         for f, raw in zip(choose_features, raws):
             data.append([x[f] for x in raw])
+        print(data)
         data = [get_hist_data(x) for x in data]
         return json.dumps(data)
 

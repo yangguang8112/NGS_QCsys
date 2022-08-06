@@ -5,6 +5,12 @@
 ``` shell
 pip install -r requirement.txt
 
+cd react_module
+npm install
+```
+
+React 目录初始构造如下（不要执行仅作记录）
+``` shell
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
 npx create-react-app react_module
 cd react_module

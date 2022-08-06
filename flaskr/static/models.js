@@ -140,7 +140,7 @@ function compare_models() {
 }
 
 function train_new_window() {
-    window.open('train_new_model', 'train', 'location=no, toolbar=no, height=805, width=805');
+    window.open('train_new_model', 'train', 'location=no, toolbar=no, height=888, width=805');
 }
 
 function train_new_model() {

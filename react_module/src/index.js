@@ -11,10 +11,13 @@ import ReportPage from './tableReport';
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
-  <React.StrictMode>
+  // 不注释掉 strictmode的话effect会执行两次，在多选框那个模块就会报错了
+  // <React.StrictMode>
+  <div>
     {/* <AnimatedMulti /> */}
     <ReportPage />
-  </React.StrictMode>
+  </div>
+  // </React.StrictMode>
 );
 
 
