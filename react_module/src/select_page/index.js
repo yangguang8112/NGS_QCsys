@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import AnimatedMulti from './select';
+import AnimatedMulti from '../select';
+
 
 
 
