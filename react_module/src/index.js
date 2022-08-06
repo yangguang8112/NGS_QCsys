@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import AnimatedMulti from './select';
 import App from './echart_demo';
+import ReportPage from './tableReport';
 
 
 
@@ -11,7 +12,8 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <React.StrictMode>
-    <AnimatedMulti />
+    {/* <AnimatedMulti /> */}
+    <ReportPage />
   </React.StrictMode>
 );
 

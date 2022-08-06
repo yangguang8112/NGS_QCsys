@@ -20,13 +20,7 @@ echarts.use([LineChart]);
 echarts.use([BarChart]);
 
 
-
-const animatedComponents = makeAnimated();
-
-
-
-export default function AnimatedMulti() {
-
+function DistrSelect() {
     const [colourOptions, setdata] = useState([]);
     useEffect(
         () => {
@@ -48,26 +42,31 @@ export default function AnimatedMulti() {
 
     return (
         <div>
-            <div className='AnimatedMulti'>
+            <div className='DistrSelect'>
             <Select
                 closeMenuOnSelect={false}
-                // 动态效果，但是选择的第一个会出现很长的条
-                // components={animatedComponents}
-                defaultValue={[colourOptions[0], colourOptions[1]]}
-                isMulti
+                defaultValue={[colourOptions[0]]}
+                // isMulti
                 options={colourOptions}
                 value={selectedOption}
                 onChange={setSelectedOption}
             />
             </div>
             <div>
-                <Plot_data features={selectedOption}/>
+                {/* <Plot_data features={selectedOption}/> */}
             </div>
         </div>
     );
 }
 
-
+function inArray(inputarray, check_data) {
+    for (let i=0;i<inputarray.length;i++) {
+        if (check_data == inputarray[i]) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 function Plot_data(props) {
@@ -207,11 +206,14 @@ function Plotting(props) {
 
 
 
-function inArray(inputarray, check_data) {
-    for (let i=0;i<inputarray.length;i++) {
-        if (check_data == inputarray[i]) {
-            return true;
-        }
-    }
-    return false;
+export default function ReportPage() {
+    return (
+        <div>
+            <div style={{width: "50%", height: "20%"}}>
+                <DistrSelect />
+            </div>
+        </div>
+    )
 }
+
+
