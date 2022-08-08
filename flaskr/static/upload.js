@@ -134,6 +134,7 @@ $(function() {
         form.append('file', file)
 
         var xhr = new XMLHttpRequest();
+        // console.log("hell")
         console.log(url);
         xhr.open("post", url, true)
         NSpinner.show();
