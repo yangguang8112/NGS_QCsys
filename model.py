@@ -2,6 +2,7 @@ import pickle
 import re
 import numpy as np
 import pandas as pd
+from sklearn.manifold import TSNE
 
 
 
@@ -9,6 +10,11 @@ features = ['_100X_Coverage_pct', 'MODERATE_impact_INDEL', 'SNP_in_dbSNP', 'chr1
 MODEL_PATH = 'model/RFC_for11611.model'
 SEED = 2022
 cvFolds = 2
+
+def doTSNE(df):
+    tsne = TSNE()
+    X_embedded = tsne.fit_transform(df)
+    return X_embedded
 
 def pred_one(one_sample, model_path=MODEL_PATH):
     with open(model_path, "rb") as f:
@@ -35,12 +41,15 @@ def pred_samples(raw_col_names, data, model_path=MODEL_PATH, features=features):
     input_data.fillna(0)
     # input_data = StandardScaler().fit_transform(input_data)
     print(input_data)
+    X_embedded = doTSNE(input_data)
+    # print(X_embedded)
     preds = clf.predict(input_data)
     probas = clf.predict_proba(input_data)
     probas_NO = probas[:, 0]
     probas_YES = probas[:, 1]
     # print(probas)
-    res = {'sample_id': df['sample_ID'].tolist(), 'preds': preds.tolist(), 'probas_yes': probas_YES.tolist(), 'probas_no': probas_NO.tolist()}
+    res = {'sample_id': df['sample_ID'].tolist(), 'preds': preds.tolist(), 'probas_yes': probas_YES.tolist(), 'probas_no': probas_NO.tolist(), 'X_embedded': X_embedded.tolist()}
+    # 'x_xais': x_xais.tolist(), 'y_xais': y_xais.tolist()}
     # print(res)
     return res
 
@@ -55,6 +64,7 @@ def pred_11611_samples(model, features=features):
     df = df[features]
     new_df = StandardScaler().fit_transform(df)
     new_df = df.fillna(0)
+    X_embedded = doTSNE(new_df)
     preds = clf.predict(new_df)
     probas = clf.predict_proba(new_df)
     df['preds'] = preds
@@ -63,7 +73,8 @@ def pred_11611_samples(model, features=features):
     res_df = df[['preds', 'probas_no', 'probas_yes']]
     print(res_df)
     res = {'preds': res_df['preds'].tolist(), 'probas_no': res_df['probas_no'].tolist(), 
-           'probas_yes': res_df['probas_yes'].tolist(), 'bad_samples_index': list(res_df[res_df['preds'] == 0].index)}
+           'probas_yes': res_df['probas_yes'].tolist(), 'bad_samples_index': list(res_df[res_df['preds'] == 0].index),
+           'X_embedded': X_embedded.tolist()}
     return res
 
 

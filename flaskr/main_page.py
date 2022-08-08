@@ -212,17 +212,24 @@ def models_page():
 @bp.route('/dotplot/<data>')
 def dotplot(data):
     pred_res = json.loads(data)
-    pred_res["yesno"] = []
-    for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
-        if y <= n:
-            pred_res["yesno"].append([y, n])
-    rest_num = 1000 - len(pred_res["yesno"])
-    for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
-        if y > n and rest_num > 0:
-            rest_num -= 1
-            pred_res["yesno"].append([y, n])
-    # print(pred_res["yesno"])
-    return render_template('dotplot.html', pred_res=pred_res["yesno"])
+    # pred_res["yesno"] = []
+    # for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
+    #     if y <= n:
+    #         pred_res["yesno"].append([y, n])
+    # rest_num = 1000 - len(pred_res["yesno"])
+    # for y, n in zip(pred_res['probas_yes'], pred_res['probas_no']):
+    #     if y > n and rest_num > 0:
+    #         rest_num -= 1
+    #         pred_res["yesno"].append([y, n])
+    # # print(pred_res["yesno"])
+    good_coord, bad_coord = [], []
+    for pred, coord in zip(pred_res["preds"], pred_res["X_embedded"]):
+        if pred == 1:
+            good_coord.append(coord)
+        else:
+            bad_coord.append(coord)
+    return render_template('dotplot.html', good_coord=good_coord, bad_coord=bad_coord)
+
 
 def build_venn_data(sample_ids, data_set):
     set_list = []
@@ -567,7 +574,13 @@ def predict_result_page(pred_res):
     res["yesno"] = []
     for y, n in zip(res['probas_yes'], res['probas_no']):
         res["yesno"].append([y, n])
-    return render_template('dotplot.html', pred_res=res["yesno"])
+    good_coord, bad_coord = [], []
+    for pred, coord in zip(res["preds"], res["X_embedded"]):
+        if pred == 1:
+            good_coord.append(coord)
+        else:
+            bad_coord.append(coord)
+    return render_template('dotplot.html', pred_res=res["yesno"], good_coord=good_coord, bad_coord=bad_coord)
 
 
 @bp.route('/find_samples')
