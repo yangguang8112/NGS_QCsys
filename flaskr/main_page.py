@@ -1,8 +1,11 @@
 from calendar import c, month
 from email.mime import base
 from lib2to3.pgen2.pgen import generate_grammar
+from mimetypes import init
 from ossaudiodev import control_names
+from re import A
 from statistics import mode
+from turtle import dot
 from warnings import warn_explicit
 from webbrowser import get
 # from this import d
@@ -20,7 +23,7 @@ import sys
 from werkzeug.utils import secure_filename
 import os
 import random
-from model import generate_training_info, pred_one, pred_samples, training_model
+from model import generate_training_info, pred_one, pred_samples, training_model, doTSNE
 # import requests
 import flask
 import json
@@ -28,6 +31,7 @@ import json
 from itertools import combinations
 from functools import reduce
 import numpy as np
+import collections
 
 
 bp = Blueprint('main_page', __name__, template_folder='templates', static_folder='static')
@@ -39,11 +43,61 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 FEATURES = ['_100X_Coverage_pct', 'MODERATE_impact_INDEL', 'SNP_in_dbSNP', 'chr1_AveDepth_X', 'TotalBases_Gb', 'SV_Whamg_Number', 'SNP_in_gnomAD_exomes', 'chr21_AveDepth_X', 'Heterozygous_SNP', 'Read1_G_pct', 'Het_Hom', 'INDEL_Number', 'HIGH_impact_INDEL', 'SV_xTea_Number', '_1X_Coverage_pct', 'SV_lumpy_Number', 'Clean_data_Raw_data_pct', 'CNV_CNVnator_DUP_Length', 'Novel_SNP', 'Homozygous_SNP', '_20X_Coverage_pct', 'SV_manta_Anno_Number', 'INDEL_in_TOPMed', 'chr18_AveDepth_X', 'chr8_AveDepth_X', 'LOW_impact_INDEL', '_80X_Coverage_pct', 'MODIFIER_impact_INDEL', 'chrX_AveDepth_X', 'Read2_G_pct', 'Sd_Depth_Norm_Distribution', 'SV_lumpy_Anno_Number', 'Read2_T_pct', 'SV_delly_Anno_Number', 'chr11_AveDepth_X', 'Read1_Q30_pct', 'SNP_in_1KGP3', 'MODERATE_impact_SNP', 'INDEL_in_dbSNP', 'SV_manta_Number', 'chr10_AveDepth_X', 'chr22_AveDepth_X', 'Novel_INDEL', 'Read1_T_pct', 'Sd_Autosome_Depth', 'CNV_CNVnator_Number', '_50X_Coverage_pct', 'LOW_impact_SNP', 'Read1_Q20_pct', 'SV_MELT_Number', 'chr13_AveDepth_X', 'chr5_AveDepth_X', 'chr4_AveDepth_X', 'chr14_AveDepth_X', '_10X_Coverage_pct', 'Read2BaseDiversity_GC_pct', 'Read2_C_pct', 'HIGH_impact_SNP', 'SNP_in_gnomAD_genomes', 'SNP_in_ChinaMAP', 'GC_pct', 'INDEL_in_ChinaMAP', 'Read2_Q30_pct', 'Read2BaseDiversity_AT_pct', 'UniqueRate_pct', 'chr7_AveDepth_X', 'Read1BaseDiversity_AT_pct', 'MappingRate_pct', 'chr19_AveDepth_X', 'SdCoverage', '_40X_Coverage_pct', 'Max_N_content_pct', '_5X_Coverage_pct', 'AveDepth_X', 'SV_xTea_Anno_Number', 'Read1_C_pct', 'AveInsertSize', 'chr12_AveDepth_X', 'INDEL_in_1KGP3', 'chr17_AveDepth_X', 'Homozygous_INDEL', '_60X_Coverage_pct', '_70X_Coverage_pct', 'CNV_CNVnator_Anno_Number', 'CNV_CNVnator_DEL_Length', 'chr16_AveDepth_X', 'contamination_pct', 'Read2_A_pct', 'SV_MELT_Anno_Number', 'SdInsertSize', 'chr2_AveDepth_X', 'Range_Autosome_Depth_X', 'SNP_in_TOPMed', 'Read1_A_pct', 'chr6_AveDepth_X', 'Read2_Q20_pct', 'INDEL_in_gnomAD_genomes', 'Read1BaseDiversity_GC_pct', '_90X_Coverage_pct', 'chr3_AveDepth_X', '_30X_Coverage_pct', 'SNP_Number', 'chrM_AveDepth_X', 'INDEL_in_gnomAD_exomes', 'DuplicateRate_pct', 'Heterozygous_INDEL', 'SV_Whamg_Anno_Number', 'Ti_Tv', 'TotalReads_Mb', 'SV_delly_Number', 'chr9_AveDepth_X', 'chr15_AveDepth_X', 'MODIFIER_impact_SNP', 'chrY_AveDepth_X', 'MismatchRate_pct', 'chr20_AveDepth_X']
 BASE_MODELS = ['RFC', 'GBC', 'LRN', 'SVC', 'GNB', 'MLP', 'ADT', 'ETC']
+FEATURES1 = [x for x in FEATURES if 'SNP' in x or 'SV' in x or 'CNV' in x or 'INDEL' in x]
+FEATURES2 = [x for x in FEATURES if 'Coverage' in x or 'Depth' in x]
+FEATURES3 = list(set(FEATURES) - set(FEATURES1 + FEATURES2))
 
 @bp.route('/')
 def homepage():
     # return render_template('layout.html')
     return render_template('mainpage.html')
+
+
+@bp.route('/get_sample_date')
+def get_sample_date():
+    db = get_db()
+    raws = db.execute("select Judge, created from sample_all_info").fetchall()
+    samples_date = [(raw['Judge'], "{}-{}-{}".format(raw['created'].year, raw['created'].month, raw['created'].day)) for raw in raws]
+    date_list = []
+    no_count, yes_count, all_count = [], [], []
+    for judge, date in samples_date:
+        if date not in date_list:
+            date_list.append(date)
+            if no_count:
+                init_count = [no_count[-1], yes_count[-1], all_count[-1]]
+            else:
+                init_count = [0, 0, 0]
+            no_count.append(init_count[0])
+            yes_count.append(init_count[1])
+            all_count.append(init_count[2])
+        if judge == 'NO':
+            no_count[-1] += 1
+        else:
+            yes_count[-1] += 1
+        all_count[-1] += 1
+    return json.dumps({"date_list": date_list,
+                        "no_count": no_count,
+                        "yes_count": yes_count,
+                        "all_count": all_count,
+                        "max_count": max(no_count+yes_count+all_count)+1000,
+                        "min_count": max(0, min(no_count+yes_count+all_count)-200)})
+
+@bp.route('/get_wordcloud_data')
+def get_wordcloud_data():
+    db = get_db()
+    words = db.execute("select * from sample_all_info").fetchall()
+    db.close()
+    words = [x['Note_Warning'] for x in words if x['Note_Warning']]
+    res = collections.defaultdict(int)
+    for w in words:
+        for x in w.split("/"):
+            if x not in ["GC(%)", 'μL）']:
+                res[x] += 1
+    toReact = []
+    for k, v in res.items():
+        toReact.append({"name": k, "value": v})
+    return json.dumps(toReact)
+    
 
 def get_hist_data(data_list, bins=100):
     none_num = len([i for i in data_list if not i])
@@ -229,6 +283,32 @@ def dotplot(data):
         else:
             bad_coord.append(coord)
     return render_template('dotplot.html', good_coord=good_coord, bad_coord=bad_coord)
+
+@bp.route('/get_dot_data')
+def get_dot_data():
+    db = get_db()
+    raws = db.execute("SELECT {} FROM sample_all_info".format(",".join(FEATURES3+['Judge'])))
+    labels = []
+    data = collections.defaultdict(list)
+    for raw in raws:
+        if raw['Judge'] == 'NO':
+            labels.append(0)
+        else:
+            labels.append(1)
+        for f in FEATURES3:
+            data[f].append(raw[f])
+    df = pd.DataFrame(data)
+    X_embedded = doTSNE(df).tolist()
+    good_coord, bad_coord = [], []
+    for pred, coord in zip(labels, X_embedded):
+        if pred == 1:
+            good_coord.append(coord)
+        else:
+            bad_coord.append(coord)
+    # print(df)
+    return json.dumps({'good_coord': good_coord, 'bad_coord': bad_coord})
+    return render_template('dotplot.html', good_coord=good_coord, bad_coord=bad_coord)
+
 
 
 def build_venn_data(sample_ids, data_set):

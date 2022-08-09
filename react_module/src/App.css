@@ -36,3 +36,12 @@
     transform: rotate(360deg);
   }
 }
+
+
+#container{width: 100%;}
+#left{float: left;width: 50%;}
+#right{float: right;width: 50%;}
+
+#container2{width: 100%;}
+#left2{float: left;width: 50%;}
+#right2{float: right;width: 50%;}

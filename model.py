@@ -12,6 +12,7 @@ SEED = 2022
 cvFolds = 2
 
 def doTSNE(df):
+    df = df.fillna(0)
     tsne = TSNE()
     X_embedded = tsne.fit_transform(df)
     return X_embedded
