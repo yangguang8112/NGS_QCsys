@@ -148,37 +148,25 @@ $(function() {
             }
         }, false);
         
-        var flag = 0
-        xhr.addEventListener("readystatechange", function() {
-            var result = xhr;
-            flag += 1;
-            if (result.lengthComputable) {
-                //上传进度
-                var percent = (result.loaded / result.total * 100).toFixed(2);
-                // console.log(percent);
-            }
-            // console.log(flag);
-            // var res_json = JSON.parse(result.response)
-            
-            // if (result.status != 200) { //error
-            //     console.log('上传失败', result.status, result.statusText, result.response);
-            // }
-            // else if (result.readyState == 4) { //finished
-            //     console.log('上传成功', result);
-            // }
-            if (flag == 3) {
+        xhr.send(form); //开始上传
+        xhr.onload = function(e) {
+            console.log('onload e ======>' + JSON.stringify(e));
+        };
+        xhr.onreadystatechange = function(e) {
+            console.log('onreadystatechage e======>' + JSON.stringify(e));
+            if (xhr.readyState == 4 && xhr.status == 200) {
                 NSpinner.hide();
-                var res_json = eval("(" + result.response + ")");
-                // res_json = JSON.parse(result.response)
-                // console.log(res_json);
+                var xhrRes = xhr.responseText;
+                console.log('return message=======>');
+                var res_json = eval("(" + xhrRes + ")");
+                console.log(res_json);
                 show_table(res_json['col_name']);
                 sample_streamtable(res_json['data']);
                 window.colName = res_json['col_name'];
                 window.contentData = res_json['data'];
                 upload();
             }
-        });
-        xhr.send(form); //开始上传
+        };
       }
     );
 });
@@ -209,18 +197,21 @@ function predict_sample() {
     var xhr = new XMLHttpRequest();
     xhr.open("post", target_url, true)
     xhr.send(form);
-    var flag = 0
-    xhr.addEventListener("readystatechange", function() {
-        var result = xhr;
-        flag += 1;
-        if (flag == 3) {
-            console.log("预测完成");
-            var pred_res = JSON.parse(result.responseText)
+    xhr.onload = function(e) {
+        console.log('onload e ======>' + JSON.stringify(e));
+    };
+    xhr.onreadystatechange = function(e) {
+        console.log('onreadystatechage e======>' + JSON.stringify(e));
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            NSpinner.hide();
+            var xhrRes = xhr.responseText;
+            console.log('return message=======>');
+            var pred_res = eval("(" + xhrRes + ")");
             NSpinner.hide();
             console.log(pred_res);
-            new_window(result.responseText);
+            new_window(xhrRes);
         }
-    });
+    };
 }
 
 
@@ -236,13 +227,18 @@ function upload_data() {
     var xhr = new XMLHttpRequest();
     xhr.open("post", target_url, true)
     xhr.send(form);
-    var flag = 0
-    xhr.addEventListener("readystatechange", function() {
-        var result = xhr;
-        flag += 1;
-        if (flag == 3) {
+    xhr.onload = function(e) {
+        console.log('onload e ======>' + JSON.stringify(e));
+    };
+    xhr.onreadystatechange = function(e) {
+        console.log('onreadystatechage e======>' + JSON.stringify(e));
+        if (xhr.readyState == 4 && xhr.status == 200) {
+            NSpinner.hide();
+            var xhrRes = xhr.responseText;
+            console.log('return message=======>');
+            NSpinner.hide();
             console.log("上传完成");
-            var train_flag = JSON.parse(result.responseText)['train_flag']
+            var train_flag = JSON.parse(xhrRes)['train_flag']
             NSpinner.hide();
             if (train_flag == 1) {
                 var oReq = new XMLHttpRequest();
@@ -251,6 +247,6 @@ function upload_data() {
                 alert("上传数据中发现有人工标注的不合格样本，根据上传的新数据已重新选取数据训练，详情可到Models页面查看！");
             }
         }
-    });
+    };
 }
 

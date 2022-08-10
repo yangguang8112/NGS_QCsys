@@ -3,6 +3,8 @@
 
 ### Install
 ``` shell
+cd NGS_QCsys
+mkdir uploads model
 pip install -r requirement.txt
 
 cd react_module
@@ -12,6 +14,7 @@ npm install
 React 目录初始构造如下（不要执行仅作记录）
 ``` shell
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+nvm install node
 npx create-react-app react_module
 cd react_module
 npm i --save react-select
@@ -31,3 +34,6 @@ npm i -S echarts
 - ~~新建训练模型加入数据选择（可以直接用sample id来选择）~~，*上传页面也可以弹窗出来问是否训练以及数据选择(因为新建训练里有选择样本的功能，这里就不做了)*
 - ~~在线报表~~
 - ~~查看模型训练：样本平衡、参数，万例为什么预测完概率是一条直线分布~~一条直线是因为x+y=1，我用的正负label的概率作为横纵坐标，所以点图肯定都是落在x+y=1这条直线上的
+- 特征相关性热图；分布图-点图 特征关联，分bin着色；模型性能，AUC图；select page 默认全选；词云放首页
+- 上传数据核心特征check
+- 万例降维

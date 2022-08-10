@@ -5,3 +5,4 @@ imbalanced-learn==0.8.1
 pandas
 terminaltables
 xlrd==1.2.0
+openpyxl
