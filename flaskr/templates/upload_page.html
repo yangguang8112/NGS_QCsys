@@ -30,7 +30,7 @@
     font-size: 1.5rem;
     cursor: pointer;
     position: relative;
-}
+    }
 
     div.dropzone:hover {
         background-color: #f3f3f3;
@@ -48,6 +48,11 @@
     div.dropzone-drag {
         background-color: palegreen;
     }
+
+    a {
+        text-decoration: none;
+        color: white;
+    }
 </style>
 
 {% endblock %}
@@ -62,9 +67,9 @@
 {% block contained %}
 
 
-</br>
 
 <div id="upload_data">
+    <button class="button-1" role="button"><a href="../static/data/example.xlsx" download="example.xlsx">数据示例</a></button>
 </div>
 
 
