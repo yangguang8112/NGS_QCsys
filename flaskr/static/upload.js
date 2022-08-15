@@ -209,7 +209,11 @@ function predict_sample() {
             var pred_res = eval("(" + xhrRes + ")");
             NSpinner.hide();
             console.log(pred_res);
-            new_window(xhrRes);
+            if (pred_res['pred_status'] == 0) {
+                alert("数据中缺少部分特征： " + pred_res['no_features'].join(', ') + "。请修改上传数据或者根据数据已有的特征到Models页面设置对应的当前模型！");
+            } else {
+                new_window(xhrRes);
+            }
         }
     };
 }
@@ -236,16 +240,25 @@ function upload_data() {
             NSpinner.hide();
             var xhrRes = xhr.responseText;
             console.log('return message=======>');
-            NSpinner.hide();
             console.log("上传完成");
-            var train_flag = JSON.parse(xhrRes)['train_flag']
-            NSpinner.hide();
-            if (train_flag == 1) {
-                var oReq = new XMLHttpRequest();
-                oReq.open("GET", host_url + '/training');
-                oReq.send();
-                alert("上传数据中发现有人工标注的不合格样本，根据上传的新数据已重新选取数据训练，详情可到Models页面查看！");
+            var res_json = JSON.parse(xhrRes);
+            var train_flag = res_json['train_flag'];
+            var insert_status = res_json['insert_status'];
+            console.log(res_json);
+            if (insert_status == 0) {
+                var core_col = res_json['core_col'];
+                alert("数据中必须至少包含:" + core_col.join(', ') + " 请下载示例数据确保上传数据格式正确！！");
+            } else {
+                if (train_flag == 1) {
+                    var oReq = new XMLHttpRequest();
+                    oReq.open("GET", host_url + '/training');
+                    oReq.send();
+                    alert("上传数据中发现有人工标注的不合格样本，根据上传的新数据已重新选取数据训练，详情可到Models页面查看！");
+                } else {
+                    alert("上传完成！");
+                }
             }
+            
         }
     };
 }

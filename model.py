@@ -38,6 +38,9 @@ def pred_samples(raw_col_names, data, model_path=MODEL_PATH, features=features):
             df_data[col].append(d[index])
     df = pd.DataFrame(df_data)
     # print(df)
+    no_features = [f for f in features if f not in df.columns]
+    if no_features:
+        return {'pred_status': 0, 'no_features': no_features}
     input_data = df[features]
     input_data.fillna(0)
     # input_data = StandardScaler().fit_transform(input_data)
@@ -49,7 +52,7 @@ def pred_samples(raw_col_names, data, model_path=MODEL_PATH, features=features):
     probas_NO = probas[:, 0]
     probas_YES = probas[:, 1]
     # print(probas)
-    res = {'sample_id': df['sample_ID'].tolist(), 'preds': preds.tolist(), 'probas_yes': probas_YES.tolist(), 'probas_no': probas_NO.tolist(), 'X_embedded': X_embedded.tolist()}
+    res = {'sample_id': df['sample_ID'].tolist(), 'preds': preds.tolist(), 'probas_yes': probas_YES.tolist(), 'probas_no': probas_NO.tolist(), 'X_embedded': X_embedded.tolist(), 'pred_status': 1}
     # 'x_xais': x_xais.tolist(), 'y_xais': y_xais.tolist()}
     # print(res)
     return res

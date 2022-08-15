@@ -18,7 +18,7 @@ CREATE TABLE models_info (
 
 CREATE TABLE sample_all_info (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
-	task_code TEXT NOT NULL,
+	task_code TEXT,
 	sample_code TEXT NOT NULL,
     sample_concentration_ng_uL_ FLOAT,
     Sample_Volume_uL_ FLOAT,

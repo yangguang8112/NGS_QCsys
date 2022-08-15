@@ -47,6 +47,8 @@ FEATURES1 = [x for x in FEATURES if 'SNP' in x or 'SV' in x or 'CNV' in x or 'IN
 FEATURES2 = [x for x in FEATURES if 'Coverage' in x or 'Depth' in x]
 FEATURES3 = list(set(FEATURES) - set(FEATURES1 + FEATURES2))
 
+CORE_RAW_FEATUREs = ['sample ID', 'sample basenumber', 'GC%(total)', 'TotalReads(Mb)', 'Max_N_content(%)']
+
 @bp.route('/')
 def homepage():
     # return render_template('layout.html')
@@ -503,12 +505,14 @@ def insert_from_execl(col_arr, data):
     for i, col in enumerate(col_arr):
         df_data[col] = [x[i] for x in data]
     df = pd.DataFrame(df_data)
+    if len([x for x in CORE_RAW_FEATUREs if x not in df.columns]) > 0:
+        return (0, 0)
     train_flag = 0
-    if len(df[df['Judge'] == 'NO']) > 0:
+    if 'Judge' in df.columns and len(df[df['Judge'] == 'NO']) > 0:
         train_flag = 1
     print(df)
     insert_data_func('_', file_type='_', df_input=df)
-    return train_flag
+    return (1, train_flag)
     
 
 def insert_data_func(file_path, file_type='xlsx', df_input=None):
@@ -517,18 +521,20 @@ def insert_data_func(file_path, file_type='xlsx', df_input=None):
         df = pd.read_excel(file_path,)
     else:
         df = df_input
-    score, note_warning = get_score(df)
-    df['Score'] = score
-    df['Note_Warning'] = note_warning
+    # 不打分了
+    # score, note_warning = get_score(df)
+    # df['Score'] = score
+    # df['Note_Warning'] = note_warning
     #features = ['Q30 %', 'GC %', 'Max N Content(%)', 'TotalReads(Mb)', 'TotalBases(Gb)', 'Read1_Q20(%)', 'Read2_Q20(%)', 'Read1_Q30(%)', 'Read2_Q30(%)', 'Read1_A(%)', 'Read1_T(%)', 'Read1_G(%)', 'Read1_C(%)', 'Read2_A(%)', 'Read2_T(%)', 'Read2_G(%)', 'Read2_C(%)', 'Read1BaseDiversity_AT(%)', 'Read1BaseDiversity_GC(%)', 'Read2BaseDiversity_AT(%)', 'Read2BaseDiversity_GC(%)', 'Clean data/Raw data(%)', 'MappingRate(%)', 'UniqueRate(%)', 'DuplicateRate(%)', 'MismatchRate(%)', 'AveInsertSize', 'SdInsertSize', 'chr1_AveDepth(X)', 'chr2_AveDepth(X)', 'chr3_AveDepth(X)', 'chr4_AveDepth(X)', 'chr5_AveDepth(X)', 'chr6_AveDepth(X)', 'chr7_AveDepth(X)', 'chr8_AveDepth(X)', 'chr9_AveDepth(X)', 'chr10_AveDepth(X)', 'chr11_AveDepth(X)', 'chr12_AveDepth(X)', 'chr13_AveDepth(X)', 'chr14_AveDepth(X)', 'chr15_AveDepth(X)', 'chr16_AveDepth(X)', 'chr17_AveDepth(X)', 'chr18_AveDepth(X)', 'chr19_AveDepth(X)', 'chr20_AveDepth(X)', 'chr21_AveDepth(X)', 'chr22_AveDepth(X)', 'chrM_AveDepth(X)', 'AveDepth(X)', 'Sd_Autosome_Depth', 'Range_Autosome_Depth(X)', 'Sd_Depth_Norm_Distribution', '1X_Coverage(%)', '5X_Coverage(%)', '10X_Coverage(%)', '20X_Coverage(%)', '30X_Coverage(%)', '40X_Coverage(%)', '50X_Coverage(%)', '60X_Coverage(%)', '70X_Coverage(%)', '80X_Coverage(%)', '90X_Coverage(%)', '100X_Coverage(%)', 'SdCoverage', 'SNP_Number', 'SNP_in_dbSNP', 'SNP_in_1KGP3', 'SNP_in_gnomAD_exomes', 'SNP_in_gnomAD_genomes', 'SNP_in_TOPMed', 'SNP_in_ChinaMAP', 'Novel_SNP', 'Homozygous_SNP', 'Heterozygous_SNP', 'HIGH_impact_SNP', 'MODERATE_impact_SNP', 'LOW_impact_SNP', 'MODIFIER_impact_SNP', 'Het_Hom', 'Ti_Tv', 'INDEL_Number', 'INDEL_in_dbSNP', 'INDEL_in_1KGP3', 'INDEL_in_gnomAD_exomes', 'INDEL_in_gnomAD_genomes', 'INDEL_in_TOPMed', 'INDEL_in_ChinaMAP', 'Novel_INDEL', 'Homozygous_INDEL', 'Heterozygous_INDEL', 'HIGH_impact_INDEL', 'MODERATE_impact_INDEL', 'LOW_impact_INDEL', 'MODIFIER_impact_INDEL', 'CNV_CNVnator_Number', 'CNV_CNVnator_DUP_Length', 'CNV_CNVnator_DEL_Length', 'CNV_CNVnator_Anno_Number', 'SV_lumpy_Number', 'SV_lumpy_Anno_Number', 'SV_delly_Number', 'SV_delly_Anno_Number', 'SV_manta_Number', 'SV_manta_Anno_Number', 'SV_MELT_Number', 'SV_MELT_Anno_Number', 'contamination(%)']
-    features = ['sample concentration（ng/μL）', 'Sample Volume（μL）', 'sample basenumber', '>Q30%(total)', 'GC%(total)', 'EstErr%(total)', 'TotalReads(Mb)', 'TotalBases(Gb)', 'Read1_Q20(%)', 'Read2_Q20(%)', 'Read1_Q30(%)', 'Read2_Q30(%)', 'Read1_A(%)', 'Read1_T(%)', 'Read1_G(%)', 'Read1_C(%)', 'Read2_A(%)', 'Read2_T(%)', 'Read2_G(%)', 'Read2_C(%)', 'Read1BaseDiversity_AT(%)', 'Read1BaseDiversity_GC(%)', 'Read2BaseDiversity_AT(%)', 'Read2BaseDiversity_GC(%)', 'Max_N_content(%)', 'GC(%)', 'Clean data/Raw data(%)', 'MappingRate(%)', 'UniqueRate(%)', 'DuplicateRate(%)', 'MismatchRate(%)', 'AveInsertSize', 'SdInsertSize', 'chr1_AveDepth(X)', 'chr2_AveDepth(X)', 'chr3_AveDepth(X)', 'chr4_AveDepth(X)', 'chr5_AveDepth(X)', 'chr6_AveDepth(X)', 'chr7_AveDepth(X)', 'chr8_AveDepth(X)', 'chr9_AveDepth(X)', 'chr10_AveDepth(X)', 'chr11_AveDepth(X)', 'chr12_AveDepth(X)', 'chr13_AveDepth(X)', 'chr14_AveDepth(X)', 'chr15_AveDepth(X)', 'chr16_AveDepth(X)', 'chr17_AveDepth(X)', 'chr18_AveDepth(X)', 'chr19_AveDepth(X)', 'chr20_AveDepth(X)', 'chr21_AveDepth(X)', 'chr22_AveDepth(X)', 'chrX_AveDepth(X)', 'chrY_AveDepth(X)', 'chrM_AveDepth(X)', 'AveDepth(X)', 'Sd_Autosome_Depth', 'Range_Autosome_Depth(X)', 'Sd_Depth_Norm_Distribution', '1X_Coverage(%)', '5X_Coverage(%)', '10X_Coverage(%)', '20X_Coverage(%)', '30X_Coverage(%)', '40X_Coverage(%)', '50X_Coverage(%)', '60X_Coverage(%)', '70X_Coverage(%)', '80X_Coverage(%)', '90X_Coverage(%)', '100X_Coverage(%)', 'SdCoverage', 'SNP_Number', 'SNP_in_dbSNP', 'SNP_in_1KGP3', 'SNP_in_gnomAD_exomes', 'SNP_in_gnomAD_genomes', 'SNP_in_TOPMed', 'SNP_in_ChinaMAP', 'Novel_SNP', 'Homozygous_SNP', 'Heterozygous_SNP', 'HIGH_impact_SNP', 'MODERATE_impact_SNP', 'LOW_impact_SNP', 'MODIFIER_impact_SNP', 'Het_Hom', 'Ti_Tv', 'INDEL_Number', 'INDEL_in_dbSNP', 'INDEL_in_1KGP3', 'INDEL_in_gnomAD_exomes', 'INDEL_in_gnomAD_genomes', 'INDEL_in_TOPMed', 'INDEL_in_ChinaMAP', 'Novel_INDEL', 'Homozygous_INDEL', 'Heterozygous_INDEL', 'HIGH_impact_INDEL', 'MODERATE_impact_INDEL', 'LOW_impact_INDEL', 'MODIFIER_impact_INDEL', 'CNV_CNVnator_Number', 'CNV_CNVnator_DUP_Length', 'CNV_CNVnator_DEL_Length', 'CNV_CNVnator_Anno_Number', 'SV_lumpy_Number', 'SV_lumpy_Anno_Number', 'SV_delly_Number', 'SV_delly_Anno_Number', 'SV_manta_Number', 'SV_manta_Anno_Number', 'SV_MELT_Number', 'SV_MELT_Anno_Number', 'SV_Whamg_Number', 'SV_Whamg_Anno_Number', 'SV_xTea_Number', 'SV_xTea_Anno_Number', 'contamination(%)']
-    features += ['is_bad', 'bad_note']
+    features = ['Task list no.', 'sample concentration（ng/μL）', 'Sample Volume（μL）', 'sample basenumber', '>Q30%(total)', 'GC%(total)', 'EstErr%(total)', 'TotalReads(Mb)', 'TotalBases(Gb)', 'Read1_Q20(%)', 'Read2_Q20(%)', 'Read1_Q30(%)', 'Read2_Q30(%)', 'Read1_A(%)', 'Read1_T(%)', 'Read1_G(%)', 'Read1_C(%)', 'Read2_A(%)', 'Read2_T(%)', 'Read2_G(%)', 'Read2_C(%)', 'Read1BaseDiversity_AT(%)', 'Read1BaseDiversity_GC(%)', 'Read2BaseDiversity_AT(%)', 'Read2BaseDiversity_GC(%)', 'Max_N_content(%)', 'GC(%)', 'Clean data/Raw data(%)', 'MappingRate(%)', 'UniqueRate(%)', 'DuplicateRate(%)', 'MismatchRate(%)', 'AveInsertSize', 'SdInsertSize', 'chr1_AveDepth(X)', 'chr2_AveDepth(X)', 'chr3_AveDepth(X)', 'chr4_AveDepth(X)', 'chr5_AveDepth(X)', 'chr6_AveDepth(X)', 'chr7_AveDepth(X)', 'chr8_AveDepth(X)', 'chr9_AveDepth(X)', 'chr10_AveDepth(X)', 'chr11_AveDepth(X)', 'chr12_AveDepth(X)', 'chr13_AveDepth(X)', 'chr14_AveDepth(X)', 'chr15_AveDepth(X)', 'chr16_AveDepth(X)', 'chr17_AveDepth(X)', 'chr18_AveDepth(X)', 'chr19_AveDepth(X)', 'chr20_AveDepth(X)', 'chr21_AveDepth(X)', 'chr22_AveDepth(X)', 'chrX_AveDepth(X)', 'chrY_AveDepth(X)', 'chrM_AveDepth(X)', 'AveDepth(X)', 'Sd_Autosome_Depth', 'Range_Autosome_Depth(X)', 'Sd_Depth_Norm_Distribution', '1X_Coverage(%)', '5X_Coverage(%)', '10X_Coverage(%)', '20X_Coverage(%)', '30X_Coverage(%)', '40X_Coverage(%)', '50X_Coverage(%)', '60X_Coverage(%)', '70X_Coverage(%)', '80X_Coverage(%)', '90X_Coverage(%)', '100X_Coverage(%)', 'SdCoverage', 'SNP_Number', 'SNP_in_dbSNP', 'SNP_in_1KGP3', 'SNP_in_gnomAD_exomes', 'SNP_in_gnomAD_genomes', 'SNP_in_TOPMed', 'SNP_in_ChinaMAP', 'Novel_SNP', 'Homozygous_SNP', 'Heterozygous_SNP', 'HIGH_impact_SNP', 'MODERATE_impact_SNP', 'LOW_impact_SNP', 'MODIFIER_impact_SNP', 'Het_Hom', 'Ti_Tv', 'INDEL_Number', 'INDEL_in_dbSNP', 'INDEL_in_1KGP3', 'INDEL_in_gnomAD_exomes', 'INDEL_in_gnomAD_genomes', 'INDEL_in_TOPMed', 'INDEL_in_ChinaMAP', 'Novel_INDEL', 'Homozygous_INDEL', 'Heterozygous_INDEL', 'HIGH_impact_INDEL', 'MODERATE_impact_INDEL', 'LOW_impact_INDEL', 'MODIFIER_impact_INDEL', 'CNV_CNVnator_Number', 'CNV_CNVnator_DUP_Length', 'CNV_CNVnator_DEL_Length', 'CNV_CNVnator_Anno_Number', 'SV_lumpy_Number', 'SV_lumpy_Anno_Number', 'SV_delly_Number', 'SV_delly_Anno_Number', 'SV_manta_Number', 'SV_manta_Anno_Number', 'SV_MELT_Number', 'SV_MELT_Anno_Number', 'SV_Whamg_Number', 'SV_Whamg_Anno_Number', 'SV_xTea_Number', 'SV_xTea_Anno_Number', 'contamination(%)', 'Judge']
+    # features += ['is_bad', 'bad_note']
+    raw_features = [f for f in features if f in df.columns]
     # sql_features = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_') for f in features]
-    sql_features = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_').replace('（', '_').replace('）', '_').replace('>', '_gt_').replace('<', '_le_').replace('μ', 'u') for f in features]
+    sql_features = ["_".join(f.strip().split()).replace('%', 'pct').replace('(', '_').replace(')','').replace('/', '_').replace('（', '_').replace('）', '_').replace('>', '_gt_').replace('<', '_le_').replace('μ', 'u') for f in raw_features]
     sql_features = [f if not f[0].isdigit() else '_'+f for f in sql_features]
     # cols = ['任务单号', '样本编号'] + features + ['Score', 'Note_Warning', 'Judge']
-    cols = ['Task list no.', 'sample ID'] + features + ['Score', 'Note_Warning', 'Judge']
-    sql_features = ['task_code', 'sample_code'] + sql_features + ['Score', 'Note_Warning', 'Judge']
+    cols = ['sample ID'] + raw_features
+    sql_features = ['sample_code'] + sql_features
     # df = df[df['是否交付'] == '是']
     df = df[cols]
     print(df)
@@ -629,8 +635,8 @@ def upload():
 def insert_excel_data():
     col_name = json.loads(request.form['col_arr'])
     data = json.loads(request.form['data'])
-    train_flag = insert_from_execl(col_name, data)
-    return {"insert_status": 1, "train_flag": train_flag}
+    insert_flag, train_flag = insert_from_execl(col_name, data)
+    return {"insert_status": insert_flag, "train_flag": train_flag, "core_col": CORE_RAW_FEATUREs}
 
 
 @bp.route('/predict_samples', methods=['POST'])

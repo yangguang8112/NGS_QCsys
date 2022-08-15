@@ -508,13 +508,14 @@ export default function ReportPage() {
                     <DistrSelect />
                 </div>
                 <div id='right'>
-                    <WordCloud />
-                </div>
-            </div>
-            <div id='container2'>
-                <div id='left2'>
                     <DotPlotData />
                 </div>
+                {/* <div id='right'>
+                    <WordCloud />
+                </div> */}
+            </div>
+            <div id='container2'>
+                
                 <div id='right2'>
                     <Sample_date />
                 </div>
